@@ -1,16 +1,19 @@
-import { PlaceholderPageSection } from '@/components/sections/PlaceholderPageSection';
-import { placeholdersContent } from '@/content/placeholders';
+import { useEffect } from 'react';
+import { BookCallSection } from '@/components/sections/booking/BookCallSection';
+import { bookCallContent } from '@/content/bookCall';
 
 export function BookCall() {
-  const { bookCall } = placeholdersContent;
+  useEffect(() => {
+    try {
+      document.title = bookCallContent.documentTitle;
+    } catch {
+      // Ignore document errors
+    }
+  }, []);
 
   return (
-    <main>
-      <PlaceholderPageSection
-        eyebrow={bookCall.eyebrow}
-        heading={bookCall.heading}
-        description={bookCall.description}
-      />
+    <main id="main-content" tabIndex={-1} className="outline-none">
+      <BookCallSection />
     </main>
   );
 }

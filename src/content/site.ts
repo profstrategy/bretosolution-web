@@ -9,14 +9,16 @@ export const routes = {
   pricing: '/pricing',
   audit: '/audit',
   bookCall: '/book-call',
-  devFoundation: '/dev/foundation',
 } as const;
+
+export const calendlyUrl = '[Calendly scheduling link]';
 
 export const site = {
   name: 'Bretosolution',
   wordmark: 'BRETO',
   descriptor: 'AI Visibility & Web Growth',
   routes,
+  calendlyUrl,
   navItems: [
     { label: 'Solutions', href: routes.solutions },
     { label: 'Pricing', href: routes.pricing },
@@ -37,6 +39,7 @@ export const site = {
     terms: '[Terms of service]',
   },
   header: {
+    skipToContentLabel: 'Skip to content',
     homeAriaLabel: 'Breto home',
     mainNavAriaLabel: 'Main',
     switchToDarkLabel: 'Switch to dark mode',

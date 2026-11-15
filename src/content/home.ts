@@ -35,6 +35,7 @@ export interface OfferCard {
 }
 
 export const homeContent = {
+  documentTitle: 'Bretosolution — AI Visibility & Web Growth',
   hero: {
     eyebrow: 'Restaurants and hospitality · AI search visibility',
     heading: 'Be discovered by the customers already searching for',

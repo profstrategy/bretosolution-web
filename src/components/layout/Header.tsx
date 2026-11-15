@@ -60,7 +60,7 @@ export function Header() {
           >
             <img
               src={assets.bretoLogo.src}
-              alt={assets.bretoLogo.alt}
+              alt=""
               width={40}
               height={40}
               className="h-[40px] w-[40px] shrink-0 rounded-[10px] object-cover"

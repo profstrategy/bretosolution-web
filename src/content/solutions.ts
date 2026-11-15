@@ -17,6 +17,7 @@ export interface AddOnItem {
 }
 
 export const solutionsContent = {
+  documentTitle: 'Solutions | Bretosolution',
   hero: {
     eyebrow: 'Solutions',
     heading: 'Built around how guests',

@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  FormField,
+  formControlBaseClass,
+} from '@/components/forms/FormField';
 import { Button } from '@/components/ui/Button';
 import { AppLink } from '@/components/ui/AppLink';
 import {
@@ -12,9 +16,6 @@ import { auditFormContent } from '@/content/audit';
 import { cn } from '@/lib/utils';
 
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
-
-const inputBaseClass =
-  'w-full min-h-[48px] rounded-[8px] border border-[var(--line)] bg-[var(--bg)] px-3.5 py-2.5 font-[family-name:var(--font-sans)] text-[16px] text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors';
 
 export function AuditRequestForm() {
   const copy = auditFormContent;
@@ -73,7 +74,7 @@ export function AuditRequestForm() {
       <div
         role="status"
         aria-live="polite"
-        className="rounded-[16px] border border-[var(--line)] bg-[var(--alt)] p-[clamp(20px,3vw,36px)] shadow-[0_18px_48px_var(--shadow)] space-y-5"
+        className="space-y-5 rounded-[16px] border border-[var(--line)] bg-[var(--alt)] p-[clamp(20px,3vw,36px)] shadow-[0_18px_48px_var(--shadow)]"
       >
         <h3 className="font-[family-name:var(--font-display)] text-[26px] font-semibold text-[var(--ink)]">
           {copy.successHeading}
@@ -98,7 +99,7 @@ export function AuditRequestForm() {
           </p>
         </div>
         <div>
-          <Button variant="secondary" onClick={handleReset}>
+          <Button variant="secondary" type="button" onClick={handleReset}>
             {copy.sendAnotherLabel}
           </Button>
         </div>
@@ -112,7 +113,7 @@ export function AuditRequestForm() {
     <form
       onSubmit={handleSubmit(onSubmit)}
       noValidate
-      className="rounded-[16px] border border-[var(--line)] bg-[var(--alt)] p-[clamp(20px,3vw,36px)] shadow-[0_18px_48px_var(--shadow)] space-y-5"
+      className="space-y-5 rounded-[16px] border border-[var(--line)] bg-[var(--alt)] p-[clamp(20px,3vw,36px)] shadow-[0_18px_48px_var(--shadow)]"
     >
       {/* Hidden honeypot field */}
       <div
@@ -130,13 +131,11 @@ export function AuditRequestForm() {
       </div>
 
       {/* 1. Business name */}
-      <div>
-        <label
-          htmlFor="audit-business-name"
-          className="mb-1.5 block font-[family-name:var(--font-sans)] text-[14px] font-medium text-[var(--ink)]"
-        >
-          {copy.businessNameLabel}
-        </label>
+      <FormField
+        id="audit-business-name"
+        label={copy.businessNameLabel}
+        error={errors.businessName?.message}
+      >
         <input
           id="audit-business-name"
           type="text"
@@ -146,30 +145,19 @@ export function AuditRequestForm() {
             errors.businessName ? 'audit-business-name-error' : undefined
           }
           className={cn(
-            inputBaseClass,
+            formControlBaseClass,
             errors.businessName && 'border-[var(--accent)]'
           )}
           {...register('businessName')}
         />
-        {errors.businessName ? (
-          <p
-            id="audit-business-name-error"
-            role="alert"
-            className="mt-1.5 font-[family-name:var(--font-sans)] text-[13px] text-[var(--accent)]"
-          >
-            {errors.businessName.message}
-          </p>
-        ) : null}
-      </div>
+      </FormField>
 
       {/* 2. Website or Instagram page */}
-      <div>
-        <label
-          htmlFor="audit-website"
-          className="mb-1.5 block font-[family-name:var(--font-sans)] text-[14px] font-medium text-[var(--ink)]"
-        >
-          {copy.websiteLabel}
-        </label>
+      <FormField
+        id="audit-website"
+        label={copy.websiteLabel}
+        error={errors.websiteOrInstagram?.message}
+      >
         <input
           id="audit-website"
           type="text"
@@ -179,31 +167,20 @@ export function AuditRequestForm() {
             errors.websiteOrInstagram ? 'audit-website-error' : undefined
           }
           className={cn(
-            inputBaseClass,
+            formControlBaseClass,
             errors.websiteOrInstagram && 'border-[var(--accent)]'
           )}
           {...register('websiteOrInstagram')}
         />
-        {errors.websiteOrInstagram ? (
-          <p
-            id="audit-website-error"
-            role="alert"
-            className="mt-1.5 font-[family-name:var(--font-sans)] text-[13px] text-[var(--accent)]"
-          >
-            {errors.websiteOrInstagram.message}
-          </p>
-        ) : null}
-      </div>
+      </FormField>
 
-      {/* 3. City & 4. Business type (half-width on desktop, stacked on mobile) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label
-            htmlFor="audit-city"
-            className="mb-1.5 block font-[family-name:var(--font-sans)] text-[14px] font-medium text-[var(--ink)]"
-          >
-            {copy.cityLabel}
-          </label>
+      {/* 3. City & 4. Business type */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <FormField
+          id="audit-city"
+          label={copy.cityLabel}
+          error={errors.city?.message}
+        >
           <input
             id="audit-city"
             type="text"
@@ -211,29 +188,18 @@ export function AuditRequestForm() {
             aria-invalid={Boolean(errors.city)}
             aria-describedby={errors.city ? 'audit-city-error' : undefined}
             className={cn(
-              inputBaseClass,
+              formControlBaseClass,
               errors.city && 'border-[var(--accent)]'
             )}
             {...register('city')}
           />
-          {errors.city ? (
-            <p
-              id="audit-city-error"
-              role="alert"
-              className="mt-1.5 font-[family-name:var(--font-sans)] text-[13px] text-[var(--accent)]"
-            >
-              {errors.city.message}
-            </p>
-          ) : null}
-        </div>
+        </FormField>
 
-        <div>
-          <label
-            htmlFor="audit-business-type"
-            className="mb-1.5 block font-[family-name:var(--font-sans)] text-[14px] font-medium text-[var(--ink)]"
-          >
-            {copy.businessTypeLabel}
-          </label>
+        <FormField
+          id="audit-business-type"
+          label={copy.businessTypeLabel}
+          error={errors.businessType?.message}
+        >
           <select
             id="audit-business-type"
             aria-invalid={Boolean(errors.businessType)}
@@ -241,7 +207,7 @@ export function AuditRequestForm() {
               errors.businessType ? 'audit-business-type-error' : undefined
             }
             className={cn(
-              inputBaseClass,
+              formControlBaseClass,
               errors.businessType && 'border-[var(--accent)]'
             )}
             {...register('businessType')}
@@ -252,26 +218,15 @@ export function AuditRequestForm() {
               </option>
             ))}
           </select>
-          {errors.businessType ? (
-            <p
-              id="audit-business-type-error"
-              role="alert"
-              className="mt-1.5 font-[family-name:var(--font-sans)] text-[13px] text-[var(--accent)]"
-            >
-              {errors.businessType.message}
-            </p>
-          ) : null}
-        </div>
+        </FormField>
       </div>
 
       {/* 5. Business email */}
-      <div>
-        <label
-          htmlFor="audit-email"
-          className="mb-1.5 block font-[family-name:var(--font-sans)] text-[14px] font-medium text-[var(--ink)]"
-        >
-          {copy.emailLabel}
-        </label>
+      <FormField
+        id="audit-email"
+        label={copy.emailLabel}
+        error={errors.email?.message}
+      >
         <input
           id="audit-email"
           type="email"
@@ -279,21 +234,12 @@ export function AuditRequestForm() {
           aria-invalid={Boolean(errors.email)}
           aria-describedby={errors.email ? 'audit-email-error' : undefined}
           className={cn(
-            inputBaseClass,
+            formControlBaseClass,
             errors.email && 'border-[var(--accent)]'
           )}
           {...register('email')}
         />
-        {errors.email ? (
-          <p
-            id="audit-email-error"
-            role="alert"
-            className="mt-1.5 font-[family-name:var(--font-sans)] text-[13px] text-[var(--accent)]"
-          >
-            {errors.email.message}
-          </p>
-        ) : null}
-      </div>
+      </FormField>
 
       {/* Inline error state if submission fails */}
       {status === 'error' ? (
@@ -320,7 +266,7 @@ export function AuditRequestForm() {
         </Button>
       </div>
 
-      {/* Privacy note */}
+      {/* Privacy / consent note */}
       <p className="font-[family-name:var(--font-sans)] text-[13px] leading-relaxed text-[var(--muted)]">
         {copy.privacyNote}
       </p>

@@ -12,7 +12,7 @@ export function Audit() {
   }, []);
 
   return (
-    <main>
+    <main id="main-content" tabIndex={-1} className="outline-none">
       <AuditPageSection />
     </main>
   );

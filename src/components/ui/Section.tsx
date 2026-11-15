@@ -25,7 +25,12 @@ export function Section({
   return (
     <section
       id={id}
-      className={cn('py-[88px]', toneClasses[tone], className)}
+      className={cn(
+        'py-[88px]',
+        id && 'scroll-mt-[96px]',
+        toneClasses[tone],
+        className
+      )}
       {...rest}
     >
       {children}
