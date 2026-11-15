@@ -1,0 +1,6 @@
+{
+  "name": "Bretosolution",
+  "description": "React + Vite + TypeScript + Tailwind CSS starter application with React Router.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
