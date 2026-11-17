@@ -21,7 +21,7 @@ export function Restaurants() {
               {restaurants.description}
             </p>
 
-            <div className="mt-8">
+            {/* <div className="mt-8">
               <p className="font-[family-name:var(--font-sans)] text-[12px] font-semibold uppercase tracking-[0.09em] text-[var(--muted)]">
                 {restaurants.loseGuestsLabel}
               </p>
@@ -39,7 +39,7 @@ export function Restaurants() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </div> */}
           </div>
 
           {/* Right column */}

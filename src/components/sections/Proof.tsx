@@ -10,7 +10,7 @@ export function Proof() {
   return (
     <Section tone="alt" id="proof">
       <Container>
-        <div className="flex flex-wrap items-start gap-y-[48px] gap-x-[64px]">
+        <div className="flex flex-wrap items-center gap-y-[48px] gap-x-[64px]">
           {/* Left column */}
           <div className="min-w-0 flex-[1_1_360px]">
             <Eyebrow className="mb-3">{proof.eyebrow}</Eyebrow>
@@ -23,7 +23,7 @@ export function Proof() {
           </div>
 
           {/* Right column */}
-          <div className="min-w-0 flex-[1.25_1_440px]">
+          <div className="min-w-0 flex-[1.25_1_440px] ">
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-[12px] border-[1.5px] border-dashed border-[var(--muted)] p-[24px]">
               <span className="font-[family-name:var(--font-display)] text-[20px] font-semibold text-[var(--ink)]">
                 {proof.boxTitle}
@@ -33,7 +33,7 @@ export function Proof() {
               </span>
             </div>
 
-            <div className="mt-7">
+            {/* <div className="mt-7">
               <p className="mb-2 font-[family-name:var(--font-sans)] text-[12px] font-semibold uppercase tracking-[0.09em] text-[var(--muted)]">
                 {proof.listEyebrow}
               </p>
@@ -47,7 +47,7 @@ export function Proof() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </div> */}
           </div>
         </div>
       </Container>

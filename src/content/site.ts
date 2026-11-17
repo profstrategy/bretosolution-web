@@ -59,9 +59,7 @@ export const site = {
     ] satisfies NavItem[],
     contactEyebrow: 'Contact',
     contactItems: [
-      '[Business email]',
-      '[Phone or WhatsApp]',
-      'bretosolution.com',
+      'hello@bretosolution.com'
     ],
     rightsSuffix: 'Bretosolution. All rights reserved.',
     legalNotice: '[Privacy notice] · [Terms of service]',

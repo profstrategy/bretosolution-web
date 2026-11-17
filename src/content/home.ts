@@ -51,46 +51,46 @@ export const homeContent = {
       href: routes.solutions,
     },
     window1: {
-      title: 'Audit log · format example',
+      title: 'Our Audit report · format example',
       badge: 'Not a real result',
       rows: [
         {
           label: 'Platform',
-          value: '[ChatGPT Search / Gemini / Perplexity]',
+          value: 'ChatGPT Search',
         },
         {
           label: 'Query',
-          value: '“Recommend restaurants for a family dinner in [location].”',
+          value: '“Recommend restaurants for a family dinner in Wuse, Abuja.”',
         },
         {
           label: 'Test date',
-          value: '[DD Mon YYYY]',
+          value: '17/11/2026',
         },
         {
           label: 'Business mentioned',
-          value: '[Yes / No]',
+          value: 'No',
         },
         {
           label: 'Website cited',
-          value: '[Yes / No]',
+          value: 'No',
         },
         {
           label: 'Hours, address, menu',
-          value: '[Accurate / Inaccurate]',
+          value: 'Accurate',
         },
         {
           label: 'Competitors named',
-          value: '[Recorded]',
+          value: 'Citro Abuja, Wakkis Food, Marks at the Park',
         },
       ] satisfies AuditLogRow[],
     },
     window2: {
       title: 'AI search · sample query',
-      userBubble: 'Where can I get [cuisine] in [location]?',
+      userBubble: 'Where can I get French cuisine in Wuse, around Aminu Kano Cres axis?',
       assistantBubble: '[Answer recorded here, with the sources it cited]',
     },
     disclaimer:
-      'One test is an observation, not a ranking. Results vary by user, location, model and time, so we repeat tests and report the limits.',
+      'One test is an observation, not a ranking, we repeat tests and report the limits.',
   },
   problemSolution: {
     heading: 'Rise in social media followers',
