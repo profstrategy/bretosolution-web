@@ -15,10 +15,9 @@ export interface PrincipleItem {
   description: string;
 }
 
-export interface ServiceRow {
-  title: string;
-  scope: string;
-  youGet: string;
+export interface ServiceLink {
+  label: string;
+  href: string;
 }
 
 export interface AuditStep {
@@ -150,34 +149,24 @@ export const homeContent = {
   services: {
     eyebrow: 'Solutions',
     heading: 'Three services that work together.',
-    youGetLabel: 'You get',
-    rows: [
+    description:
+      'Search visibility, a website that converts, and the monthly work that keeps both improving.',
+    links: [
       {
-        title: 'AI Search Visibility',
-        scope:
-          'AI search testing, technical SEO, local SEO, content strategy, structured data and digital authority.',
-        youGet:
-          'More accurate and useful discovery across the search experiences your customers use.',
+        label: 'AI Search Visibility',
+        href: `${routes.solutions}#ai-search-visibility`,
       },
       {
-        title: 'Website Development',
-        scope:
-          'Business websites, landing pages, restaurant sites, booking and ordering flows, and the integrations behind them.',
-        youGet:
-          'A credible, usable website that supports enquiries, bookings and orders.',
+        label: 'Website Development',
+        href: `${routes.solutions}#website-development`,
       },
       {
-        title: 'Ongoing Digital Growth',
-        scope:
-          'Monitoring, maintenance, content improvements, analytics, reporting and conversion optimization.',
-        youGet:
-          'Sustained website quality and measurable improvement over time.',
+        label: 'Ongoing Digital Growth',
+        href: `${routes.solutions}#ongoing-digital-growth`,
       },
-    ] satisfies ServiceRow[],
-    cta: {
-      label: 'See every solution',
-      href: routes.solutions,
-    },
+    ] satisfies ServiceLink[],
+    caption:
+      'Example restaurant admin dashboard with demo data, beside a local search results view. Google Maps is a trademark of Google LLC.',
   },
   auditProcess: {
     eyebrow: 'The free audit',

@@ -8,13 +8,13 @@ export function OngoingGrowthSection() {
   const { ongoingGrowth } = solutionsContent;
 
   return (
-    <Section tone="bg" id="ongoing-growth">
+    <Section tone="bg" id="ongoing-digital-growth">
       <Container>
         <div className="flex flex-wrap items-start gap-y-10 gap-x-[64px]">
           {/* Left column */}
           <div className="min-w-0 flex-[1_1_360px]">
             <Eyebrow className="mb-3">{ongoingGrowth.eyebrow}</Eyebrow>
-            <SectionHeading className="max-w-[16ch]">
+            <SectionHeading tabIndex={-1} className="max-w-[16ch] outline-none">
               {ongoingGrowth.heading}
             </SectionHeading>
             <div className="mt-5 space-y-4">

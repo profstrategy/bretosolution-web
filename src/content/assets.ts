@@ -42,6 +42,18 @@ export const assets = {
     width: 44,
     height: 44,
   },
+  servicesDashboard: {
+    src: '/assets/aistudio/dashboard.webp',
+    alt: 'Example restaurant admin dashboard with orders, pending payments, revenue and a sales trend chart',
+    width: 1343,
+    height: 585,
+  },
+  servicesMap: {
+    src: '/assets/aistudio/google-map.webp',
+    alt: 'Local restaurant listings beside a map',
+    width: 1359,
+    height: 637,
+  },
 } as const satisfies Record<string, BrandAsset>;
 
 export const allBrandAssetList: BrandAsset[] = [
@@ -51,6 +63,8 @@ export const allBrandAssetList: BrandAsset[] = [
   assets.chatgpt,
   assets.gemini,
   assets.perplexity,
+  assets.servicesDashboard,
+  assets.servicesMap,
 ];
 
 export const platformLogos: BrandAsset[] = [

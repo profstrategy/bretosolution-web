@@ -11,7 +11,7 @@ export function AiSearchVisibilitySection() {
     <Section tone="bg" id="ai-search-visibility">
       <Container>
         <Eyebrow className="mb-3">{aiVisibility.eyebrow}</Eyebrow>
-        <SectionHeading className="max-w-[20ch]">
+        <SectionHeading tabIndex={-1} className="max-w-[20ch] outline-none">
           {aiVisibility.heading}
         </SectionHeading>
         <p className="mt-4 max-w-[56ch] font-[family-name:var(--font-sans)] text-[16px] leading-relaxed text-[var(--muted)]">

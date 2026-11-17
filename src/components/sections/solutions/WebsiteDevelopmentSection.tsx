@@ -11,7 +11,7 @@ export function WebsiteDevelopmentSection() {
     <Section tone="alt" id="website-development">
       <Container>
         <Eyebrow className="mb-3">{websiteDevelopment.eyebrow}</Eyebrow>
-        <SectionHeading className="max-w-[18ch]">
+        <SectionHeading tabIndex={-1} className="max-w-[18ch] outline-none">
           {websiteDevelopment.heading}
         </SectionHeading>
         <p className="mt-4 max-w-[58ch] font-[family-name:var(--font-sans)] text-[16px] leading-relaxed text-[var(--muted)]">
