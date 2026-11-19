@@ -35,3 +35,10 @@
 - Deleted `index.html`, `metadata.json`, `src/App.tsx`, `src/main.tsx`, and `vite.config.ts` after recording their duties in this log. `src/pages` no longer exists.
 - **Next.js configuration deviation:** `next build` automatically changed `jsx` from the requested `preserve` to `react-jsx`, reporting that value as mandatory because it uses React's automatic runtime. The build passes with the framework-required setting; changing it back causes Next to rewrite it on the next build.
 - Gate: `npm run build` passes and statically prerenders `/`, `/solutions`, `/pricing`, `/audit`, and `/book-call` (plus Next's 404 page). `npx tsc --noEmit` passes. No router or Vite imports remain in `src`; documentation still contains historical references.
+
+## Phase 3 — Layout, theme, and fonts
+
+- Expanded the root layout with the skip link, shared `Header`, one `<main id="main">`, and `Footer`, while preserving the previous main landmark's focusability and class. Imported the stylesheet from its existing location.
+- Replaced the remote Google Fonts CSS import with `next/font/google` for Inter (400/500/600), JetBrains Mono (400/500), Playfair Display (500/600/700), and Satisfy (400), all with `display: 'swap'`. Kept the existing CSS variable names and their system/serif/cursive fallback stacks.
+- Added an inline pre-paint theme script and matching client fallback. Saved `dark`/`light` takes priority; otherwise system dark preference is used, with light as a fallback if `matchMedia` fails. The script and client hook both tolerate unavailable localStorage.
+- Gate checks: production build and `npx tsc --noEmit` pass. Raw server HTML responds 200 and contains the theme script, skip link, main landmark, and an `h1`. **Could not verify:** the browser interaction request was denied, so dark-mode hard-reload flicker and hydration console warnings could not be observed in a browser.
