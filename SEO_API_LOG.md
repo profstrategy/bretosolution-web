@@ -44,6 +44,20 @@
 - Production build, type check, and lint passed; all five routes remain static.
 - Google Rich Results Test was not run; see the "Could not verify" items below.
 
+## Phase 3 — sitemap and robots
+
+- Added a sitemap containing only `/`, `/solutions`, and `/pricing`, with
+  absolute URLs and no build-time modification dates, priorities, or change
+  frequencies.
+- Added robots rules allowing all user agents, disallowing `/api/`, and
+  advertising the sitemap URL. No crawler-specific rules were added.
+- `npm run build`, `npx tsc --noEmit`, and `npm run lint` passed; the build
+  lists the five site pages as static, along with static metadata routes.
+  Lint reports the same eight existing `<img>` warnings.
+- Production-server curl checks confirmed `robots.txt` directives and exactly
+  three sitemap URLs (`/`, `/solutions`, `/pricing`), with no audit/book-call
+  entries or optional date/priority/change-frequency fields.
+
 ### Open items / decisions
 
 - OG image needed (1200x630).
