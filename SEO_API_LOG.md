@@ -102,6 +102,31 @@
   only the API routes are dynamic. The local development submission test is
   left for the user as requested.
 
+## Phase 6 — verification and documentation
+
+- Updated `PORTING.md` with the implemented SEO/API status, remaining work,
+  migration instructions, and an SEO/API result summary. The current guide has
+  no numbered sections 5 or 6; theme and placeholder status remain in its
+  existing migration result instead of inventing new sections.
+- Added `scripts/smoke-api.md` with manual PowerShell `curl` examples and
+  expected responses for both routes. The database and email-dependent cases
+  were documented but not run.
+- Final `npm run build` passed with `.env.local` disabled and app secrets
+  unset; `npx tsc --noEmit` and `npm run lint` passed. The build keeps all five
+  marketing pages static and only the API routes dynamic. `src/pages` does not
+  exist. Lint reports the same eight existing `<img>` warnings.
+- Production HTML checks passed for all five pages: each has one H1, a title,
+  description, canonical, Open Graph tags, and parseable JSON-LD. The
+  indexable routes have default index/follow behavior; `/audit` and
+  `/book-call` emit `noindex, follow`. JSON-LD types are Organization and
+  WebSite on every page, BreadcrumbList on `/solutions` and `/pricing`, and
+  FAQPage on `/pricing`.
+- The production server log showed no `window is not defined` error during
+  these page requests. The temporary environment-file rename was restored
+  without reading its contents.
+- Google Rich Results Test, real database writes, real email delivery, and
+  rate limiting behind a production proxy remain unverified.
+
 ### Open items / decisions
 
 - OG image needed (1200x630).

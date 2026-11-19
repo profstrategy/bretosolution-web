@@ -51,29 +51,30 @@ Replace the `useEffect` `document.title` assignments in `src/pages/*.tsx` with N
 
 ### (a) Audit & Quote Form API Routes (`POST /api/audit-requests` & `POST /api/quote-requests`)
 
-Currently, form submissions are handled by client-side mocks in `src/lib/api/audit.ts` (`submitAuditRequest`) and `src/lib/api/quote.ts` (`submitQuoteRequest`) that wait 700ms, store records in `localStorage`, and return a reference code (`BR-XXXXXX` or `QT-XXXXXX`).
+**Implemented:** `src/app/api/audit-requests/route.ts` and
+`src/app/api/quote-requests/route.ts` are Node.js, force-dynamic POST routes.
+They enforce JSON and 20 KB limits, preserve the `company_site` honeypot,
+validate with the existing Zod schemas, rate-limit to five requests per hour
+per hashed IP and route bucket, and persist the approved form fields through
+Prisma. Raw IP addresses are not stored. Resend sends a plain-text lead
+notification after persistence; a notification failure does not discard the
+saved request.
 
-1. **Create `app/api/audit-requests/route.ts` (`POST /api/audit-requests`)**:
-   - Parse the JSON request body and validate it with `auditRequestSchema` from `src/schemas/audit.ts`.
-   - **Honeypot check**: if `company_site` is non-empty, return `{ ok: true, ref }` with HTTP `200` without storing or sending notifications.
-   - **Rate limiting**: enforce per-IP rate limiting (e.g., sliding window by client IP header) and return HTTP `429` when exceeded.
-   - Generate a unique `BR-XXXXXX` reference, persist the request to your database, trigger email notification, and return `{ ok: true, ref }`.
-
-2. **Create `app/api/quote-requests/route.ts` (`POST /api/quote-requests`)**:
-   - Parse the JSON request body and validate it with `quoteRequestSchema` from `src/schemas/quote.ts` (covering Step 1 fields `businessType`, `helpNeeded`, `mainChallenge` and Step 2 fields `contactName`, `businessName`, `email`, `phoneOrWhatsapp`, `websiteOrInstagram`, `countryRegion`).
-   - **Honeypot check**: if `company_site` is non-empty, return `{ ok: true, ref }` with HTTP `200` without storing or sending notifications.
-   - **Rate limiting**: enforce per-IP rate limiting and return HTTP `429` when exceeded.
-   - Generate a unique `QT-XXXXXX` reference, persist the scoped quote request, trigger email notification, and return `{ ok: true, ref }`.
-
-3. **Update Client Callers (`src/lib/api/audit.ts` & `src/lib/api/quote.ts`)**:
-   - Replace the `setTimeout` + `localStorage` logic with `fetch('/api/audit-requests', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values) })` and `fetch('/api/quote-requests', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values) })`.
-   - `AuditRequestForm` and `QuoteRequestForm` require no changes because they already consume `submitAuditRequest` and `submitQuoteRequest`.
+The routes return HTTP `201` with `{ ok: true, id }`. The client helpers
+`submitAuditRequest` and `submitQuoteRequest` call those routes with a
+15-second timeout and map `id` to the existing UI `ref` field. Other failures
+use the generic error UI; HTTP `429` has a separate rate-limit message.
+Database migration deployment and real email delivery remain to be verified.
 
 ---
 
 ### (b) Calendly Inline Embed & Webhook (`POST /api/webhooks/calendly`)
 
 > **Important distinction:** A Calendly webhook **receives booking events** after a visitor schedules or cancels a call; it **does not fetch or render the booking interface**.
+
+**Not implemented:** this webhook remains out of scope; no Calendly webhook
+route or booking database model was created. The existing scheduling URL is
+still a placeholder.
 
 1. **Booking Interface (`/book-call` page & `src/components/booking/CalendlyEmbed.tsx`)**:
    - The `/book-call` page keeps the inline `<iframe>` embed of the public Calendly scheduling URL (`NEXT_PUBLIC_CALENDLY_SCHEDULING_URL` wired into `calendlyUrl` in `src/content/site.ts`).
@@ -97,18 +98,38 @@ Currently, form submissions are handled by client-side mocks in `src/lib/api/aud
 
 ## 4. Environment Variables
 
-Configure the following environment variables in `.env.local` / production deployment (no values are hardcoded in the repository):
+The active site and form API variables are listed without values in
+`.env.example`. Configure them in the deployment environment:
 
-- `NEXT_PUBLIC_CALENDLY_SCHEDULING_URL` — Public Calendly scheduling URL rendered by the inline iframe on `/book-call` (replaces `"[Calendly scheduling link]"` in `src/content/site.ts`).
-- `CALENDLY_WEBHOOK_SIGNING_KEY` — Server-only secret signing key used by `POST /api/webhooks/calendly` to verify `Calendly-Webhook-Signature` headers.
+**Status:** the API variables below are now read by the application where
+needed. Calendly configuration remains open and is not read by these API
+routes.
+
+- `NEXT_PUBLIC_SITE_URL` — Public canonical site origin; defaults to
+  `https://bretosolution.com`.
+- `DATABASE_URL` — Pooled PostgreSQL URL used by the Prisma Client.
+- `DIRECT_URL` — Direct PostgreSQL URL used by Prisma migrations.
+- `RATE_LIMIT_SALT` — Server-only salt used to hash client IP addresses.
+- `RESEND_API_KEY` — Server-only Resend API key.
+- `LEAD_NOTIFY_EMAIL` — Recipient for new audit and quote notifications.
+- `LEAD_FROM_EMAIL` — Verified sender address for those notifications.
+
+The following Calendly variables remain for the unimplemented integration:
+
+- `NEXT_PUBLIC_CALENDLY_SCHEDULING_URL` — Public scheduling URL; the current
+  content still contains a placeholder.
+- `CALENDLY_WEBHOOK_SIGNING_KEY` — Only needed if the deferred Calendly
+  webhook is implemented. No webhook route currently reads it.
 
 ## Migration result
 
 ### Completed
 
 - Migrated the marketing site to the Next.js App Router with static server-rendered routes for `/`, `/solutions`, `/pricing`, `/audit`, and `/book-call`.
-- Preserved the existing section content, styling, public asset paths, form schemas, client-side mock submissions, and booking placeholder.
-- Added the shared layout, existing font families/weights through `next/font`, pre-paint theme initialization, and only the existing page titles and site-wide description.
+- Preserved the existing section content, styling, public asset paths, form schemas, and booking placeholder.
+- Added the shared layout, existing font families/weights through `next/font`, and pre-paint theme initialization.
+- Added static SEO metadata, JSON-LD, a sitemap, and robots rules. `/audit` and `/book-call` are currently `noindex, follow`.
+- Added dynamic audit and quote API routes, PostgreSQL Prisma models/migration, rate limiting, and Resend lead notifications. The form helpers now call those routes.
 
 ### Deviations and verification limits
 
@@ -119,8 +140,23 @@ Configure the following environment variables in `.env.local` / production deplo
 
 ### Still open
 
-- Expanded SEO metadata and JSON-LD, sitemap, and robots.
-- Real form API routes, persistence, notifications, and spam protection.
+- Run `npx prisma migrate deploy` against the intended Supabase database after setting `DATABASE_URL` and `DIRECT_URL`; this repository change did not contact the database.
+- Verify real form persistence, Resend delivery, and rate-limit behavior behind the production proxy.
 - A real Calendly scheduling URL and booking integration.
 - Privacy and Terms pages.
 - Bracketed placeholders for business contact details, legal notices, and Calendly.
+- A 1200 × 630 social sharing image; no suitable existing image was found.
+
+## SEO and API result
+
+- SEO metadata, structured data, sitemap, robots, and the two form API routes
+  are implemented. The five site pages remain statically rendered; only the
+  API routes are dynamic.
+- The checked-in migration was generated without connecting to a database.
+  The operator must configure `DATABASE_URL` and `DIRECT_URL` and run
+  `npx prisma migrate deploy` against Supabase.
+- No production database write, Resend delivery, Google Rich Results Test,
+  or production-proxy rate-limit test was performed.
+- The current document has no numbered sections 5 or 6. Theme migration is
+  recorded as completed above; placeholder status is listed under “Still
+  open.” No new numbered sections were invented.
