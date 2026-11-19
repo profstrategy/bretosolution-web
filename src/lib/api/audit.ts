@@ -4,8 +4,8 @@
  * MOCK IMPLEMENTATION — TO BE REPLACED BY A SERVER ROUTE
  * This client-side mock simulates an API call by waiting 700ms, storing
  * valid audit requests in localStorage under "bretosolution.audit-requests",
- * and returning a generated reference code. Move this logic to a server
- * route when migrating to Next.js or attaching a backend.
+ * and returning a generated reference code. Replace this with a server route
+ * only when a backend is configured.
  */
 
 import type { AuditRequestValues } from '@/schemas/audit';

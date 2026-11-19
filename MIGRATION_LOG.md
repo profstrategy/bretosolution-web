@@ -49,3 +49,9 @@
 - Reused the one existing site-wide description from `index.html` on every route, matching how the SPA served that global description. No route-specific metadata descriptions existed; no new marketing copy was written.
 - Did not add Open Graph, canonical URLs, JSON-LD, sitemap, or robots metadata.
 - Gate: production build, `npx tsc --noEmit`, and `npm run lint` pass; lint reports the same eight image warnings.
+
+## Phase 5 — Forms and mocks
+
+- Kept both client-side mock submissions, their schemas, honeypots, submit guards, 700ms delay, localStorage keys, and success states unchanged. Updated only stale mock comments that said the backend would arrive with the framework migration.
+- Kept the calendar placeholder behavior for empty/unconfigured URLs; no API routes or real booking integration were added.
+- Static inspection confirms each form still calls its original mock and retains its schema resolver and existing success UI. **Could not verify:** browser access was denied, so validation/submission and success-state interactions were not exercised.
