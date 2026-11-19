@@ -7,7 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint --config node_modules/eslint-config-next/dist/core-web-vitals.js --rule \"react-hooks/set-state-in-effect: off\" src"
+    "lint": "eslint --config node_modules/eslint-config-next/dist/core-web-vitals.js --rule \"react-hooks/set-state-in-effect: off\" src",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
@@ -20,6 +21,7 @@
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-hook-form": "^7.92.0",
+    "resend": "6.39.0",
     "tailwind-merge": "^3.3.1",
     "zod": "^4.6.7"
   },

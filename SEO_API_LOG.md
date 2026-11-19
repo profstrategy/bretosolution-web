@@ -58,6 +58,34 @@
   three sitemap URLs (`/`, `/solutions`, `/pricing`), with no audit/book-call
   entries or optional date/priority/change-frequency fields.
 
+## Phase 4 — database and API routes
+
+- Added the approved `AuditRequest`, `QuoteRequest`, and `RateLimitHit` models
+  for PostgreSQL, plus the initial migration generated from the Prisma schema.
+  Added a `createdAt` index to keep the required per-request 24-hour cleanup
+  efficient, alongside the approved compound rate-limit index.
+- Added a lazy Prisma 6.19.3 singleton, lazy Zod-validated environment
+  accessors, bounded JSON/response helpers, and rate limiting using salted
+  SHA-256 IP hashes. A transaction-scoped PostgreSQL advisory lock keeps
+  concurrent checks for the same route/IP bucket serialized.
+- Added Node.js-only dynamic POST routes for audit and quote requests. Both
+  use the existing Zod schemas, omit the honeypot from storage, truncate
+  user-agent data to 200 characters, store no raw IP, save before notifying,
+  and preserve success if notification fails.
+- Added the allowed Resend dependency (`resend` 6.39.0), a Prisma `postinstall`
+  generation step, and all required environment variable names to
+  `.env.example`.
+- Verification passed: Prisma schema validation/generation, checked-in
+  migration-to-schema diff, `npm run build` with `.env.local` temporarily
+  disabled and no app environment variables set, `npx tsc --noEmit`, and
+  `npm run lint`. The build lists the five site pages as static and only the
+  two API routes as dynamic. Lint has eight existing `<img>` warnings.
+- Local production-server checks confirmed 415 for non-JSON, 413 for a body
+  over 20 KB, and 201 for both honeypot routes without database or Resend
+  configuration. No database or email service was contacted.
+- Could not verify real database writes/migration deployment, Resend delivery,
+  or rate limiting behind the production proxy.
+
 ### Open items / decisions
 
 - OG image needed (1200x630).
