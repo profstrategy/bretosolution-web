@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { pricingContent } from '@/content/pricing';
 import { submitQuoteRequest } from '@/lib/api/quote';
+import { TooManyAttemptsError } from '@/lib/api/submit';
 import { cn } from '@/lib/utils';
 import {
   quoteRequestSchema,
@@ -31,6 +32,9 @@ export function QuoteRequestForm() {
   const [step, setStep] = useState<1 | 2>(1);
   const [status, setStatus] = useState<FormStatus>('idle');
   const [reference, setReference] = useState<string>('');
+  const [submissionError, setSubmissionError] = useState<string>(
+    copy.errorMessage
+  );
 
   const {
     register,
@@ -78,6 +82,7 @@ export function QuoteRequestForm() {
   const onSubmit = async (values: QuoteRequestValues) => {
     if (status === 'submitting') return;
     setStatus('submitting');
+    setSubmissionError(copy.errorMessage);
     try {
       const result = await submitQuoteRequest(values);
       if (result.ok) {
@@ -86,7 +91,10 @@ export function QuoteRequestForm() {
       } else {
         setStatus('error');
       }
-    } catch {
+    } catch (error) {
+      if (error instanceof TooManyAttemptsError) {
+        setSubmissionError(copy.tooManyAttemptsMessage);
+      }
       setStatus('error');
     }
   };
@@ -95,6 +103,7 @@ export function QuoteRequestForm() {
     reset();
     setReference('');
     setStep(1);
+    setSubmissionError(copy.errorMessage);
     setStatus('idle');
   };
 
@@ -409,7 +418,7 @@ export function QuoteRequestForm() {
             role="alert"
             className="flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-[var(--accent)] bg-[var(--bg)] p-3.5 text-[14px] text-[var(--accent)]"
           >
-            <span>{copy.errorMessage}</span>
+            <span>{submissionError}</span>
             <Button variant="small" type="button" onClick={handleRetry}>
               {copy.retryLabel}
             </Button>

@@ -112,6 +112,7 @@ export const pricingContent = {
     sendAnotherLabel: 'Send another request',
     errorMessage:
       'Something went wrong while sending your request. Please try again.',
+    tooManyAttemptsMessage: 'Too many attempts. Please try again later.',
     retryLabel: 'Try again',
     honeypotLabel: 'Company site',
   },

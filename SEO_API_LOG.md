@@ -86,6 +86,22 @@
 - Could not verify real database writes/migration deployment, Resend delivery,
   or rate limiting behind the production proxy.
 
+## Phase 5 — wire the forms
+
+- Replaced both localStorage mocks with POST requests through a shared fetch
+  helper. It uses a 15-second `AbortController` timeout and maps the returned
+  database ID to the existing `ref` success shape.
+- The forms show the 429 message from their existing content files. Other HTTP
+  and network failures retain the generic error UI and preserve form values;
+  server field errors are not mapped because these forms have no server-error
+  field handling today.
+- The existing form fields, labels, honeypot name, success copy, pending
+  disable behavior, and layout are unchanged.
+- Verification passed: production build with `.env.local` temporarily disabled,
+  `npx tsc --noEmit`, and `npm run lint`. The five site pages remain static;
+  only the API routes are dynamic. The local development submission test is
+  left for the user as requested.
+
 ### Open items / decisions
 
 - OG image needed (1200x630).

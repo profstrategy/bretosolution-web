@@ -14,6 +14,7 @@ import {
   type AuditRequestValues,
 } from '@/schemas/audit';
 import { submitAuditRequest } from '@/lib/api/audit';
+import { TooManyAttemptsError } from '@/lib/api/submit';
 import { auditFormContent } from '@/content/audit';
 import { cn } from '@/lib/utils';
 
@@ -23,6 +24,9 @@ export function AuditRequestForm() {
   const copy = auditFormContent;
   const [status, setStatus] = useState<FormStatus>('idle');
   const [reference, setReference] = useState<string>('');
+  const [submissionError, setSubmissionError] = useState<string>(
+    copy.errorMessage
+  );
 
   const {
     register,
@@ -48,6 +52,7 @@ export function AuditRequestForm() {
   const onSubmit = async (values: AuditRequestValues) => {
     if (status === 'submitting') return;
     setStatus('submitting');
+    setSubmissionError(copy.errorMessage);
     try {
       const result = await submitAuditRequest(values);
       if (result.ok) {
@@ -56,7 +61,10 @@ export function AuditRequestForm() {
       } else {
         setStatus('error');
       }
-    } catch {
+    } catch (error) {
+      if (error instanceof TooManyAttemptsError) {
+        setSubmissionError(copy.tooManyAttemptsMessage);
+      }
       setStatus('error');
     }
   };
@@ -64,6 +72,7 @@ export function AuditRequestForm() {
   const handleReset = () => {
     reset();
     setReference('');
+    setSubmissionError(copy.errorMessage);
     setStatus('idle');
   };
 
@@ -249,7 +258,7 @@ export function AuditRequestForm() {
           role="alert"
           className="flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-[var(--accent)] bg-[var(--bg)] p-3.5 text-[14px] text-[var(--accent)]"
         >
-          <span>{copy.errorMessage}</span>
+          <span>{submissionError}</span>
           <Button variant="small" type="button" onClick={handleRetry}>
             {copy.retryLabel}
           </Button>

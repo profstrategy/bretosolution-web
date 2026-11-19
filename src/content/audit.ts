@@ -40,5 +40,6 @@ export const auditFormContent = {
   sendAnotherLabel: 'Send another request',
   errorMessage:
     'Something went wrong. Your details are still here. Please try again.',
+  tooManyAttemptsMessage: 'Too many attempts. Please try again later.',
   retryLabel: 'Try again',
 } as const;
