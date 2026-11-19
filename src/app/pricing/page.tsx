@@ -1,11 +1,21 @@
 import type { Metadata } from 'next';
-import { siteDescription } from '@/content/site';
-import { pricingContent } from '@/content/pricing';
+import { seoContent } from '@/content/seo';
 import PricingView from '@/views/PricingView';
 
 export const metadata: Metadata = {
-  title: pricingContent.documentTitle,
-  description: siteDescription,
+  title: seoContent.pages.pricing.title,
+  description: seoContent.pages.pricing.description,
+  alternates: {
+    canonical: seoContent.pages.pricing.canonicalPath,
+  },
+  openGraph: {
+    type: 'website',
+    siteName: seoContent.siteName,
+    locale: 'en',
+    title: seoContent.pages.pricing.title,
+    description: seoContent.pages.pricing.description,
+    url: seoContent.pages.pricing.canonicalPath,
+  },
 };
 
 export default function PricingPage() {

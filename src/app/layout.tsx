@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import {
   Inter,
@@ -8,7 +9,25 @@ import {
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { site } from '@/content/site';
+import { seoContent } from '@/content/seo';
 import '../styles/globals.css';
+
+export const metadata: Metadata = {
+  metadataBase: new URL(seoContent.siteUrl),
+  title: {
+    default: `${seoContent.pages.home.title} | Bretosolution`,
+    template: '%s | Bretosolution',
+  },
+  applicationName: seoContent.siteName,
+  openGraph: {
+    type: 'website',
+    siteName: seoContent.siteName,
+    locale: 'en',
+  },
+  twitter: {
+    card: 'summary',
+  },
+};
 
 const inter = Inter({
   subsets: ['latin'],
