@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Hero } from '@/components/sections/Hero';
 import { ProblemSolution } from '@/components/sections/ProblemSolution';
 import { Principles } from '@/components/sections/Principles';
@@ -8,19 +7,10 @@ import { Restaurants } from '@/components/sections/Restaurants';
 import { Offers } from '@/components/sections/Offers';
 import { Proof } from '@/components/sections/Proof';
 import { HomeClosingCta } from '@/components/sections/HomeClosingCta';
-import { homeContent } from '@/content/home';
 
-export function Home() {
-  useEffect(() => {
-    try {
-      document.title = homeContent.documentTitle;
-    } catch {
-      // Ignore document errors
-    }
-  }, []);
-
+export default function HomeView() {
   return (
-    <main id="main-content" tabIndex={-1} className="outline-none">
+    <>
       <Hero />
       <ProblemSolution />
       <Principles />
@@ -30,6 +20,6 @@ export function Home() {
       <Offers />
       <Proof />
       <HomeClosingCta />
-    </main>
+    </>
   );
 }

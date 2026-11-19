@@ -1,0 +1,96 @@
+import type { ReactNode } from 'react';
+import {
+  Inter,
+  JetBrains_Mono,
+  Playfair_Display,
+  Satisfy,
+} from 'next/font/google';
+import { Footer } from '@/components/layout/Footer';
+import { Header } from '@/components/layout/Header';
+import { site } from '@/content/site';
+import '../styles/globals.css';
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+  variable: '--font-inter-next',
+});
+
+const jetBrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  display: 'swap',
+  variable: '--font-jetbrains-mono-next',
+});
+
+const playfairDisplay = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  display: 'swap',
+  variable: '--font-playfair-display-next',
+});
+
+const satisfy = Satisfy({
+  subsets: ['latin'],
+  weight: '400',
+  display: 'swap',
+  variable: '--font-satisfy-next',
+});
+
+const themeInitializationScript = `
+(function () {
+  var mode = null;
+  try {
+    var stored = window.localStorage.getItem('breto-theme');
+    if (stored === 'dark' || stored === 'light') mode = stored;
+  } catch (e) {}
+
+  if (!mode) {
+    try {
+      mode = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
+    } catch (e) {
+      mode = 'light';
+    }
+  }
+
+  try {
+    if (mode === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  } catch (e) {}
+})();
+`;
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${jetBrainsMono.variable} ${playfairDisplay.variable} ${satisfy.variable}`}
+    >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{ __html: themeInitializationScript }}
+        />
+      </head>
+      <body>
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:inline-flex focus:min-h-[44px] focus:items-center focus:rounded-[10px] focus:bg-[var(--btn)] focus:px-4 focus:py-2.5 focus:font-[family-name:var(--font-sans)] focus:text-[14px] focus:font-semibold focus:text-[var(--btnfg)] focus:shadow-lg"
+        >
+          {site.header.skipToContentLabel}
+        </a>
+        <Header />
+        <main id="main" tabIndex={-1} className="outline-none">
+          {children}
+        </main>
+        <Footer />
+      </body>
+    </html>
+  );
+}

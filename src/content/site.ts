@@ -13,6 +13,9 @@ export const routes = {
 
 export const calendlyUrl = '[Calendly scheduling link]';
 
+export const siteDescription =
+  'Bretosolution helps restaurants and hospitality businesses improve their visibility on Google and AI search platforms and builds websites that convert visitors into customers.';
+
 export const site = {
   name: 'Bretosolution',
   wordmark: 'BRETO',

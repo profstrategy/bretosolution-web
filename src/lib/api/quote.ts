@@ -1,9 +1,11 @@
+"use client";
+
 /**
  * MOCK IMPLEMENTATION — TO BE REPLACED BY A SERVER ROUTE
  * This client-side mock simulates an API call by waiting 700ms, storing
  * valid quote requests in localStorage under "bretosolution.quote-requests",
- * and returning a generated QT-XXXXXX reference code. A server route will
- * replace this file's implementation when migrating to Next.js.
+ * and returning a generated QT-XXXXXX reference code. A server route can
+ * replace this mock when a backend is configured.
  */
 
 import type { QuoteRequestValues } from '@/schemas/quote';

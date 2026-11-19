@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+"use client";
+
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight } from 'lucide-react';
@@ -56,34 +58,6 @@ export function QuoteRequestForm() {
       company_site: '',
     },
   });
-
-  useEffect(() => {
-    const handleFocusQuoteForm = () => {
-      try {
-        if (status === 'success') {
-          reset();
-          setReference('');
-          setStatus('idle');
-        }
-        setStep(1);
-        window.setTimeout(() => {
-          try {
-            setFocus('businessType');
-          } catch {
-            const el = document.getElementById('quote-business-type');
-            el?.focus();
-          }
-        }, 60);
-      } catch {
-        // Ignore focus errors
-      }
-    };
-
-    window.addEventListener('breto:focus-quote-form', handleFocusQuoteForm);
-    return () => {
-      window.removeEventListener('breto:focus-quote-form', handleFocusQuoteForm);
-    };
-  }, [reset, setFocus, status]);
 
   const handleContinueToStep2 = async () => {
     const isValid = await trigger(STEP_1_FIELDS);

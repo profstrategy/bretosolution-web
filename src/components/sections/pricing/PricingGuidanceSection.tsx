@@ -1,4 +1,6 @@
-import { useState, type MouseEvent } from 'react';
+"use client";
+
+import { useState } from 'react';
 import {
   ArrowUpRight,
   ChevronDown,
@@ -31,30 +33,6 @@ function PackageIcon({ iconKey }: { iconKey: PricingGuidancePackage['iconKey'] }
 export function PricingGuidanceSection() {
   const { leftPanel, rightPanel, dropdown } = pricingContent.pricingGuidance;
   const [isOpen, setIsOpen] = useState(false);
-
-  const handleDiscussSmallProject = (e: MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    try {
-      const targetEl =
-        document.getElementById('quote-form') ??
-        document.getElementById('quote');
-      const prefersReducedMotion = window.matchMedia(
-        '(prefers-reduced-motion: reduce)'
-      ).matches;
-
-      targetEl?.scrollIntoView({
-        behavior: prefersReducedMotion ? 'auto' : 'smooth',
-        block: 'start',
-      });
-
-      window.dispatchEvent(new CustomEvent('breto:focus-quote-form'));
-
-      const firstField = document.getElementById('quote-business-type');
-      firstField?.focus({ preventScroll: true });
-    } catch {
-      // Ignore DOM access errors
-    }
-  };
 
   return (
     <Section tone="bg">
@@ -134,7 +112,6 @@ export function PricingGuidanceSection() {
               <div className="mt-5">
                 <a
                   href={rightPanel.discussLinkHref}
-                  onClick={handleDiscussSmallProject}
                   className="inline-flex min-h-[44px] items-center gap-1.5 font-[family-name:var(--font-sans)] text-[14px] font-semibold text-[var(--ink)] underline underline-offset-4 transition-colors hover:text-[var(--accent)]"
                 >
                   <span>{rightPanel.discussLinkLabel}</span>

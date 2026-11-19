@@ -1,9 +1,21 @@
+"use client";
+
 import { useEffect, useState, useCallback } from 'react';
 
 export type ThemeMode = 'light' | 'dark';
 
 const STORAGE_KEY = 'breto-theme';
 const THEME_EVENT = 'breto-theme-change';
+
+function getSystemTheme(): ThemeMode {
+  try {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
+  } catch {
+    return 'light';
+  }
+}
 
 export function getStoredTheme(): ThemeMode {
   try {
@@ -14,7 +26,7 @@ export function getStoredTheme(): ThemeMode {
   } catch {
     // Ignore storage access errors
   }
-  return 'light';
+  return getSystemTheme();
 }
 
 export function applyThemeToDom(mode: ThemeMode): void {
@@ -61,7 +73,7 @@ export function useTheme(): { theme: ThemeMode; toggle: () => void } {
 
     const handleStorage = (event: StorageEvent) => {
       if (event.key === STORAGE_KEY) {
-        const next: ThemeMode = event.newValue === 'dark' ? 'dark' : 'light';
+        const next = getStoredTheme();
         setTheme(next);
         applyThemeToDom(next);
       }

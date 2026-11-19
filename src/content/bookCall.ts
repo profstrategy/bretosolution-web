@@ -1,5 +1,12 @@
 import { calendlyUrl, routes } from '@/content/site';
 
+export function isPlaceholderCalendlyUrl(url?: string): boolean {
+  if (!url) return true;
+  const trimmed = url.trim();
+  if (!trimmed || trimmed.includes('[')) return true;
+  return !trimmed.startsWith('https://');
+}
+
 export const bookCallContent = {
   documentTitle: 'Book an audit call | Bretosolution',
   headingPrefix: 'Book an',

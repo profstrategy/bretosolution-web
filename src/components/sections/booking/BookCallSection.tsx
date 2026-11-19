@@ -1,11 +1,11 @@
 import { ArrowUpRight } from 'lucide-react';
-import {
-  CalendlyEmbed,
-  isPlaceholderCalendlyUrl,
-} from '@/components/booking/CalendlyEmbed';
+import { CalendlyEmbed } from '@/components/booking/CalendlyEmbed';
 import { AppLink } from '@/components/ui/AppLink';
 import { Container } from '@/components/ui/Container';
-import { bookCallContent } from '@/content/bookCall';
+import {
+  bookCallContent,
+  isPlaceholderCalendlyUrl,
+} from '@/content/bookCall';
 import { calendlyUrl } from '@/content/site';
 
 export function BookCallSection() {
