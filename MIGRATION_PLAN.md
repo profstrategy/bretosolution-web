@@ -81,7 +81,7 @@ Only the six interactive component files listed as client need client boundaries
 - Playfair Display: 500, 600, 700; CSS variable `--font-display` with Georgia/serif fallbacks.
 - Satisfy: default/400; CSS variable `--font-script` with cursive fallback.
 
-The stylesheet keeps the four CSS variable names and stacks in `:root`. `index.html` separately preconnects to `fonts.googleapis.com` and `fonts.gstatic.com` (crossorigin on the latter). `package.json` has Tailwind CSS **v4** (`tailwindcss` 4.1.11, `@tailwindcss/postcss` 4.1.11, and the Vite-specific Tailwind plugin 4.1.11). The CSS is CSS-first (`@import "tailwindcss"`); there is no Tailwind config file. `postcss.config.mjs` uses `@tailwindcss/postcss` and `autoprefixer` and appears usable as-is with Next.js.
+The stylesheet keeps the four CSS variable names and stacks in `:root`. `index.html` separately preconnects to `fonts.googleapis.com` and `fonts.gstatic.com` (crossorigin on the latter). `package.json` has Tailwind CSS **v4** (`tailwindcss` 4.1.11, `@tailwindcss/postcss` 4.1.11, and the old Tailwind build integration 4.1.11). The CSS is CSS-first (`@import "tailwindcss"`); there is no Tailwind config file. `postcss.config.mjs` uses `@tailwindcss/postcss` and `autoprefixer` and appears usable as-is with Next.js.
 
 ### Hash and scroll behavior
 
@@ -96,9 +96,9 @@ The stylesheet keeps the four CSS variable names and stacks in `:root`. `index.h
 | File | Current duties to carry into Next.js or record in the migration log |
 | --- | --- |
 | `index.html` | `lang=en`, charset and viewport; home title and global description; Open Graph title/description; font preconnects; pre-paint theme script; `#root` and module entry. Root layout/metadata/font loading replaces these duties. |
-| `src/main.tsx` | React `StrictMode`, `createRoot(#root)`, `BrowserRouter`, and global CSS import. The App Router root layout and route tree replace it; CSS remains at `src/styles/globals.css`. |
+| `src/main.tsx` | React `StrictMode`, `createRoot(#root)`, the client-side route provider, and global CSS import. The App Router root layout and route tree replace it; CSS remains at `src/styles/globals.css`. |
 | `src/App.tsx` | Five routes; shared skip link (`#main-content`), Header and Footer; custom hash scrolling. App Router files/layout replace route/shared layout duties. |
-| `vite.config.ts` | React and Tailwind Vite plugins; `@` alias to `src`; host `0.0.0.0`, port 3000; `DISABLE_HMR` switch. Next configuration and `tsconfig.json` replace relevant duties; the Vite-only settings are retired. |
+| Old dev/build configuration | React and Tailwind build plugins; `@` alias to `src`; host `0.0.0.0`, port 3000; `DISABLE_HMR` switch. Next configuration and `tsconfig.json` replace relevant duties; the old build settings are retired. |
 | `metadata.json` | AI Studio app name/description, empty frame permissions and a Gemini server capability declaration. No app source imports it; Next metadata replaces the site's document metadata. |
 | `bun.lock` | Bun lockfile for the current package/dependency set; it has no runtime behavior. Replace with npm's `package-lock.json`. |
 
@@ -115,17 +115,17 @@ The five current page files each set `document.title` from their matching conten
 - `src/hooks/use-mobile.ts` exports `useIsMobile` but no source file imports it.
 - `allBrandAssetList` in `src/content/assets.ts` has no imports/usages; the assets module itself is used.
 - All components under `src/components` are used in the five current page compositions. No other unreferenced component, hook, or library file was found.
-- No source imports were found for `@google/genai`, `motion`, `class-variance-authority`, `@tailwindcss/typography`, `tw-animate-css`, or `firebase-tools`; confirm these as removal candidates when editing the manifests. `vite`, `@vitejs/plugin-react`, `@tailwindcss/vite`, and `react-router-dom` are Vite/router setup dependencies. `postcss`, `autoprefixer`, `tailwindcss`, `@tailwindcss/postcss`, `clsx`, `tailwind-merge`, `lucide-react`, `react-hook-form`, `zod`, and `@hookform/resolvers` are referenced by the project/configuration.
+- No source imports were found for the removed AI/API, animation, class helper, typography, and tooling packages. The old build and client-routing dependencies were only referenced by startup/configuration files. `postcss`, `autoprefixer`, `tailwindcss`, `@tailwindcss/postcss`, `clsx`, `tailwind-merge`, `lucide-react`, `react-hook-form`, `zod`, and `@hookform/resolvers` are referenced by the project/configuration.
 
 ### Environment and metadata observations
 
-- `.env.example` contains `GEMINI_API_KEY` and `APP_URL`, but no app source reads either. `vite.config.ts` reads `DISABLE_HMR`; that read disappears with Vite. No `import.meta.env`, other process environment reads, or current Calendly environment variable exists in source.
+- `.env.example` contains `GEMINI_API_KEY` and `APP_URL`, but no app source reads either. The old dev configuration reads `DISABLE_HMR`; that read disappears with its replacement. No `import.meta.env`, other process environment reads, or current Calendly environment variable exists in source.
 - The only current description is the global description in `index.html`; the five content modules contain document titles, not page-specific meta descriptions. Existing Open Graph title and description are also in `index.html`. The Phase 4 scope allows only existing title/description values, so missing page-specific descriptions remain open rather than being authored.
 - **UNKNOWN:** The compatible Next.js version and its required React versions have not been selected; verify from npm/package metadata during Phase 1 rather than assuming a version.
 
 ### Unexpected findings
 
-- `FILE_STRUCTURE.md` is tracked but omitted from the requested current-structure list. It says the two `public/assets/aistudio/` images are deleted, while both images are present and tracked in this checkout. Do not modify `public/`; keep this existing file untouched unless explicitly requested.
+- `FILE_STRUCTURE.md` was tracked but omitted from the requested current-structure list. During the audit it incorrectly said the two `public/assets/aistudio/` images were deleted; Phase 6 corrected the document. Both images remain present and `public/` was not modified.
 - The current theme fallback and requested `prefers-color-scheme` fallback conflict, as noted above.
 - The user-requested `<main id="main">` differs from the old `#main-content` target; the skip-link target must be kept in sync.
 - Phase 2's native fragment navigation intentionally replaces custom smooth-scroll/focus handling described above.

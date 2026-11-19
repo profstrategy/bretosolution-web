@@ -1,19 +1,20 @@
 # Current File Structure
 
-This tree lists the project files currently present in the repository. Generated `.git` and `node_modules` contents are excluded. The two tracked image files currently deleted from `public/assets/aistudio/` are not shown.
+This tree lists the current project files. Generated `.git`, `node_modules`, and `.next` contents are excluded.
 
 ```text
 .
 ├── .env.example
 ├── .gitignore
-├── bun.lock
-├── index.html
-├── metadata.json
+├── MIGRATION_LOG.md
+├── MIGRATION_PLAN.md
+├── next.config.ts
+├── next-env.d.ts
+├── package-lock.json
 ├── package.json
 ├── PORTING.md
 ├── postcss.config.mjs
 ├── tsconfig.json
-├── vite.config.ts
 ├── public
 │   ├── assets
 │   │   └── aistudio
@@ -27,8 +28,17 @@ This tree lists the project files currently present in the repository. Generated
 │       ├── logo-perplexity.webp
 │       └── sketch-arrow.webp
 └── src
-    ├── App.tsx
-    ├── main.tsx
+    ├── app
+    │   ├── audit
+    │   │   └── page.tsx
+    │   ├── book-call
+    │   │   └── page.tsx
+    │   ├── layout.tsx
+    │   ├── page.tsx
+    │   ├── pricing
+    │   │   └── page.tsx
+    │   └── solutions
+    │       └── page.tsx
     ├── components
     │   ├── booking
     │   │   └── CalendlyEmbed.tsx
@@ -82,23 +92,21 @@ This tree lists the project files currently present in the repository. Generated
     │   ├── pricing.ts
     │   ├── site.ts
     │   └── solutions.ts
-    ├── hooks
-    │   └── use-mobile.ts
     ├── lib
     │   ├── api
     │   │   ├── audit.ts
     │   │   └── quote.ts
     │   ├── theme.ts
     │   └── utils.ts
-    ├── pages
-    │   ├── Audit.tsx
-    │   ├── BookCall.tsx
-    │   ├── Home.tsx
-    │   ├── Pricing.tsx
-    │   └── Solutions.tsx
     ├── schemas
     │   ├── audit.ts
     │   └── quote.ts
-    └── styles
-        └── globals.css
+    ├── styles
+    │   └── globals.css
+    └── views
+        ├── AuditView.tsx
+        ├── BookCallView.tsx
+        ├── HomeView.tsx
+        ├── PricingView.tsx
+        └── SolutionsView.tsx
 ```

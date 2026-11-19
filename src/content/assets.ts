@@ -56,17 +56,6 @@ export const assets = {
   },
 } as const satisfies Record<string, BrandAsset>;
 
-export const allBrandAssetList: BrandAsset[] = [
-  assets.bretoLogo,
-  assets.sketchArrow,
-  assets.claude,
-  assets.chatgpt,
-  assets.gemini,
-  assets.perplexity,
-  assets.servicesDashboard,
-  assets.servicesMap,
-];
-
 export const platformLogos: BrandAsset[] = [
   assets.claude,
   assets.chatgpt,

@@ -1,4 +1,4 @@
-# Porting Guide: Vite + React Router SPA to Next.js (App Router)
+# Bretosolution Site Guide (Next.js App Router)
 
 This codebase is structured so that components, content modules, validation schemas, and theme tokens move 1:1 into a Next.js App Router project with minimal changes.
 
@@ -35,7 +35,7 @@ Replace the `useEffect` `document.title` assignments in `src/pages/*.tsx` with N
 2. **Fonts (`next/font/google`)**
    - Load `Playfair_Display`, `Satisfy`, `Inter`, and `JetBrains_Mono` with `display: 'swap'` in `app/layout.tsx`, bound to `--font-display`, `--font-script`, `--font-sans`, and `--font-mono`, and remove the `@import url(...)` line at the top of `src/styles/globals.css`.
 3. **Link Primitive (`src/components/ui/AppLink.tsx`)**
-   - Replace `react-router-dom`'s `<Link to={href}>` with `next/link`'s `<Link href={href}>`. All internal navigation (`Header`, `Footer`, `Button`, section CTAs, `/audit`, `/book-call`) routes through `AppLink`, so updating this single file updates the entire site.
+   - Internal navigation uses `next/link`'s `<Link href={href}>`. All internal navigation (`Header`, `Footer`, `Button`, section CTAs, `/audit`, `/book-call`) routes through `AppLink`.
 4. **`'use client'` Boundaries**
    - Add `'use client';` to interactive leaf components only:
      - `src/lib/theme.ts` and `src/components/layout/Header.tsx` (replace `useLocation()` with `usePathname()` from `next/navigation`)
@@ -101,3 +101,26 @@ Configure the following environment variables in `.env.local` / production deplo
 
 - `NEXT_PUBLIC_CALENDLY_SCHEDULING_URL` — Public Calendly scheduling URL rendered by the inline iframe on `/book-call` (replaces `"[Calendly scheduling link]"` in `src/content/site.ts`).
 - `CALENDLY_WEBHOOK_SIGNING_KEY` — Server-only secret signing key used by `POST /api/webhooks/calendly` to verify `Calendly-Webhook-Signature` headers.
+
+## Migration result
+
+### Completed
+
+- Migrated the marketing site to the Next.js App Router with static server-rendered routes for `/`, `/solutions`, `/pricing`, `/audit`, and `/book-call`.
+- Preserved the existing section content, styling, public asset paths, form schemas, client-side mock submissions, and booking placeholder.
+- Added the shared layout, existing font families/weights through `next/font`, pre-paint theme initialization, and only the existing page titles and site-wide description.
+
+### Deviations and verification limits
+
+- Next.js 16 rewrites the requested TypeScript `jsx: preserve` setting to its required `react-jsx` value during build.
+- The approved system color-scheme fallback changes the old light default when no valid theme is saved.
+- Native fragment navigation replaces the old custom scroll/focus behavior.
+- Browser-based visual parity, hydration-console checks, and interactive form/menu/accordion checks could not be verified because browser access was denied. No parity claim is made.
+
+### Still open
+
+- Expanded SEO metadata and JSON-LD, sitemap, and robots.
+- Real form API routes, persistence, notifications, and spam protection.
+- A real Calendly scheduling URL and booking integration.
+- Privacy and Terms pages.
+- Bracketed placeholders for business contact details, legal notices, and Calendly.
