@@ -1,20 +1,16 @@
-// Later (Next.js): this component keeps working with the inline embed. A server route /api/webhooks/calendly will receive booking events and store them. No server code belongs in this file.
+"use client";
 
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, ChevronRight } from 'lucide-react';
 import { assets } from '@/content/assets';
-import { bookCallContent } from '@/content/bookCall';
+import {
+  bookCallContent,
+  isPlaceholderCalendlyUrl,
+} from '@/content/bookCall';
 import { calendlyUrl as defaultCalendlyUrl } from '@/content/site';
 
 export interface CalendlyEmbedProps {
   url?: string;
-}
-
-export function isPlaceholderCalendlyUrl(url?: string): boolean {
-  if (!url) return true;
-  const trimmed = url.trim();
-  if (!trimmed || trimmed.includes('[')) return true;
-  return !trimmed.startsWith('https://');
 }
 
 export function CalendlyEmbed({ url = defaultCalendlyUrl }: CalendlyEmbedProps) {

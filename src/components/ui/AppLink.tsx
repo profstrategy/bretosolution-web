@@ -1,5 +1,5 @@
 import type { AnchorHTMLAttributes, ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 export interface AppLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   href: string;
@@ -8,11 +8,7 @@ export interface AppLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
 
 export function AppLink({ href, children, onClick, ...rest }: AppLinkProps) {
   const isExternalOrAnchor =
-    href.startsWith('http://') ||
-    href.startsWith('https://') ||
-    href.startsWith('mailto:') ||
-    href.startsWith('tel:') ||
-    href.startsWith('#');
+    /^(https?:\/\/|\/\/|mailto:|tel:|#)/i.test(href);
 
   if (isExternalOrAnchor) {
     return (
@@ -23,7 +19,7 @@ export function AppLink({ href, children, onClick, ...rest }: AppLinkProps) {
   }
 
   return (
-    <Link to={href} onClick={onClick} {...rest}>
+    <Link href={href} onClick={onClick} {...rest}>
       {children}
     </Link>
   );

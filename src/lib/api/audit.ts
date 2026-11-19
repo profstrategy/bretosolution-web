@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * MOCK IMPLEMENTATION — TO BE REPLACED BY A SERVER ROUTE
  * This client-side mock simulates an API call by waiting 700ms, storing

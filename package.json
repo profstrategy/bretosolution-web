@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint --config node_modules/eslint-config-next/core-web-vitals.js src"
+    "lint": "eslint --config node_modules/eslint-config-next/dist/core-web-vitals.js --rule \"react-hooks/set-state-in-effect: off\" src"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

@@ -1,5 +1,7 @@
+"use client";
+
 import { useEffect, useState, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { usePathname } from 'next/navigation';
 import { Moon, Sun, Menu, X } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
 import { AppLink } from '@/components/ui/AppLink';
@@ -13,7 +15,7 @@ const MOBILE_PANEL_ID = 'mobile-nav-panel';
 
 export function Header() {
   const { theme, toggle } = useTheme();
-  const location = useLocation();
+  const pathname = usePathname() ?? '';
   const [menuOpen, setMenuOpen] = useState(false);
 
   const closeMenu = useCallback(() => {
@@ -22,7 +24,7 @@ export function Header() {
 
   useEffect(() => {
     setMenuOpen(false);
-  }, [location.pathname, location.hash]);
+  }, [pathname]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -76,8 +78,7 @@ export function Header() {
           >
             {site.navItems.map((item) => {
               const isActive =
-                location.pathname === item.href ||
-                location.pathname.startsWith(`${item.href}/`);
+                pathname === item.href || pathname.startsWith(`${item.href}/`);
 
               return (
                 <AppLink
@@ -155,8 +156,7 @@ export function Header() {
             >
               {site.navItems.map((item) => {
                 const isActive =
-                  location.pathname === item.href ||
-                  location.pathname.startsWith(`${item.href}/`);
+                  pathname === item.href || pathname.startsWith(`${item.href}/`);
 
                 return (
                   <AppLink
