@@ -42,3 +42,10 @@
 - Replaced the remote Google Fonts CSS import with `next/font/google` for Inter (400/500/600), JetBrains Mono (400/500), Playfair Display (500/600/700), and Satisfy (400), all with `display: 'swap'`. Kept the existing CSS variable names and their system/serif/cursive fallback stacks.
 - Added an inline pre-paint theme script and matching client fallback. Saved `dark`/`light` takes priority; otherwise system dark preference is used, with light as a fallback if `matchMedia` fails. The script and client hook both tolerate unavailable localStorage.
 - Gate checks: production build and `npx tsc --noEmit` pass. Raw server HTML responds 200 and contains the theme script, skip link, main landmark, and an `h1`. **Could not verify:** the browser interaction request was denied, so dark-mode hard-reload flicker and hydration console warnings could not be observed in a browser.
+
+## Phase 4 — Minimum metadata
+
+- Added static metadata exports to all five route files using each existing page title from its content module.
+- Reused the one existing site-wide description from `index.html` on every route, matching how the SPA served that global description. No route-specific metadata descriptions existed; no new marketing copy was written.
+- Did not add Open Graph, canonical URLs, JSON-LD, sitemap, or robots metadata.
+- Gate: production build, `npx tsc --noEmit`, and `npm run lint` pass; lint reports the same eight image warnings.
