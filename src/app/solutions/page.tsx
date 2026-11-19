@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { seoContent } from '@/content/seo';
 import SolutionsView from '@/views/SolutionsView';
 
@@ -19,5 +20,29 @@ export const metadata: Metadata = {
 };
 
 export default function SolutionsPage() {
-  return <SolutionsView />;
+  const breadcrumbData = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: seoContent.siteUrl,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Solutions',
+        item: new URL(seoContent.pages.solutions.canonicalPath, seoContent.siteUrl).toString(),
+      },
+    ],
+  };
+
+  return (
+    <>
+      <JsonLd data={breadcrumbData} />
+      <SolutionsView />
+    </>
+  );
 }

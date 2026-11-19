@@ -30,6 +30,20 @@
   approved title/description, canonical URL, expected robots behavior,
   Open Graph defaults and page-specific tags, and `twitter:card=summary`.
 
+## Phase 2 — JSON-LD
+
+- Added a server-rendered JSON-LD component that safely escapes `<` in the
+  serialized data.
+- Added the Organization/WebSite graph to the root layout, breadcrumbs on
+  `/solutions` and `/pricing`, and a `/pricing` FAQPage generated from the same
+  plain-text FAQ rows rendered by the page.
+- Verified all four generated JSON-LD blocks parse as JSON. The organization
+  description is an excerpt of the visible home hero sentence; organization
+  name, contact email, logo asset, breadcrumbs, and pricing questions/answers
+  are also represented in rendered content.
+- Production build, type check, and lint passed; all five routes remain static.
+- Google Rich Results Test was not run; see the "Could not verify" items below.
+
 ### Open items / decisions
 
 - OG image needed (1200x630).
