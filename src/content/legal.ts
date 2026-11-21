@@ -1,5 +1,7 @@
 export const LEGAL_VERSION = '2026-11-21';
 export const LEGAL_LAST_UPDATED = '2026-11-21';
+export const CONSENT_ERROR_MESSAGE =
+  'Please accept the Terms of Service and Privacy Policy to continue.';
 
 export interface LegalSection {
   id: string;

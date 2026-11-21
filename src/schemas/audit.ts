@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { HONEYPOT_FIELD } from '@/schemas/honeypot';
+import { CONSENT_ERROR_MESSAGE } from '@/content/legal';
 
 export const BUSINESS_TYPES = [
   'Restaurant',
@@ -39,7 +41,12 @@ export const auditRequestSchema = z.object({
     .trim()
     .min(1, 'Please enter your business email.')
     .email('Please enter a valid email address.'),
-  company_site: z.string().optional(),
+  consent: z
+    .boolean({ error: CONSENT_ERROR_MESSAGE })
+    .refine((value) => value === true, {
+      message: CONSENT_ERROR_MESSAGE,
+    }),
+  [HONEYPOT_FIELD]: z.string().optional(),
 });
 
 export type AuditRequestValues = z.infer<typeof auditRequestSchema>;

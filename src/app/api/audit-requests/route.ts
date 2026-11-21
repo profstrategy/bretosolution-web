@@ -13,6 +13,7 @@ import {
   type RateLimitResult,
 } from '@/lib/server/rateLimit';
 import { auditRequestSchema } from '@/schemas/audit';
+import { LEGAL_VERSION } from '@/content/legal';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -22,6 +23,7 @@ export async function POST(request: Request): Promise<Response> {
   if (!bodyResult.ok) return bodyResult.response;
 
   if (hasFilledHoneypot(bodyResult.value)) {
+    console.warn('Honeypot triggered on /api/audit-requests');
     return jsonResponse({ ok: true, id: randomUUID() }, 201);
   }
 
@@ -30,7 +32,7 @@ export async function POST(request: Request): Promise<Response> {
     rateLimit = await recordRateLimitHit(request, '/api/audit-requests');
   } catch (error) {
     console.error('Audit request rate limit failed.', error);
-    return jsonError('Unable to process your request right now.', 500);
+    rateLimit = { limited: false, ipHash: 'rate-limit-unavailable' };
   }
 
   if (rateLimit.limited) {
@@ -56,6 +58,7 @@ export async function POST(request: Request): Promise<Response> {
     businessType: parsed.data.businessType,
     email: parsed.data.email,
   };
+  const consentAcceptedAt = new Date();
   const userAgent = request.headers.get('user-agent')?.slice(0, 200) ?? null;
 
   let id: string;
@@ -65,6 +68,8 @@ export async function POST(request: Request): Promise<Response> {
         ...values,
         ipHash: rateLimit.ipHash,
         userAgent,
+        consentAcceptedAt,
+        consentVersion: LEGAL_VERSION,
       },
       select: { id: true },
     });
@@ -75,7 +80,10 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    const notification = await notifyAuditRequest(values);
+    const notification = await notifyAuditRequest(values, {
+      acceptedAt: consentAcceptedAt,
+      version: LEGAL_VERSION,
+    });
     if (!notification.ok) {
       console.error('Audit request notification failed.', notification.error);
     } else {

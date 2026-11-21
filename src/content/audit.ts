@@ -1,5 +1,6 @@
 import { BUSINESS_TYPES, type BusinessType } from '@/schemas/audit';
 import { routes } from '@/content/site';
+import { CONSENT_ERROR_MESSAGE } from '@/content/legal';
 
 export const auditPageContent = {
   documentTitle: 'Request a free AI visibility audit | Bretosolution',
@@ -26,7 +27,10 @@ export const auditFormContent = {
   businessTypes: BUSINESS_TYPES satisfies readonly BusinessType[],
   emailLabel: 'Business email',
   emailPlaceholder: '[name@yourbusiness.com]',
-  honeypotLabel: 'Company site',
+  honeypotLabel: 'Leave this field empty',
+  consentLabel:
+    'I agree to the Terms of Service and have read the Privacy Policy.',
+  consentError: CONSENT_ERROR_MESSAGE,
   submitIdle: 'Request My Audit',
   submitSending: 'Sending…',
   privacyNote:

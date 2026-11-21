@@ -31,6 +31,8 @@ model AuditRequest {
   ipHash             String
   userAgent          String?
   notifiedAt         DateTime?
+  consentAcceptedAt  DateTime?
+  consentVersion     String?
 }
 
 model QuoteRequest {
@@ -49,6 +51,8 @@ model QuoteRequest {
   ipHash             String
   userAgent          String?
   notifiedAt         DateTime?
+  consentAcceptedAt  DateTime?
+  consentVersion     String?
 }
 
 model RateLimitHit {

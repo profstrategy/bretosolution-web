@@ -1,4 +1,5 @@
 import { routes } from '@/content/site';
+import { CONSENT_ERROR_MESSAGE } from '@/content/legal';
 import {
   QUOTE_BUSINESS_TYPES,
   QUOTE_HELP_OPTIONS,
@@ -76,6 +77,9 @@ export const pricingContent = {
     step1Title: 'Your needs',
     step2Title: 'Your details',
     requiredNote: '* Required fields',
+    consentLabel:
+      'I agree to the Terms of Service and have read the Privacy Policy.',
+    consentError: CONSENT_ERROR_MESSAGE,
     businessTypeLabel: 'Business type *',
     businessTypePlaceholder: 'Select your business type',
     businessTypeOptions: QUOTE_BUSINESS_TYPES,
@@ -114,7 +118,7 @@ export const pricingContent = {
       'Something went wrong while sending your request. Please try again.',
     tooManyAttemptsMessage: 'Too many attempts. Please try again later.',
     retryLabel: 'Try again',
-    honeypotLabel: 'Company site',
+    honeypotLabel: 'Leave this field empty',
   },
   pricingGuidance: {
     leftPanel: {
@@ -157,7 +161,7 @@ export const pricingContent = {
           iconKey: 'search',
           name: 'AI Visibility Optimization',
           typeTag: 'One-time project',
-          ngnPrice: '₦250k–₦500k',
+          ngnPrice: '₦150k–₦500k',
           intlPrice: 'International clients: $500–$1,000',
           problem:
             'Your business details are inconsistent or hard for search and AI platforms to read.',

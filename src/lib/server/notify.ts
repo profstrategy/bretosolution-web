@@ -1,10 +1,21 @@
 import { Resend } from 'resend';
 import type { AuditRequestValues } from '@/schemas/audit';
 import type { QuoteRequestValues } from '@/schemas/quote';
+import { HONEYPOT_FIELD } from '@/schemas/honeypot';
 import { getResendConfig } from '@/lib/server/env';
 
-type AuditLead = Omit<AuditRequestValues, 'company_site'>;
-type QuoteLead = Omit<QuoteRequestValues, 'company_site'>;
+type AuditLead = Omit<
+  AuditRequestValues,
+  typeof HONEYPOT_FIELD | 'consent'
+>;
+type QuoteLead = Omit<
+  QuoteRequestValues,
+  typeof HONEYPOT_FIELD | 'consent'
+>;
+interface ConsentRecord {
+  acceptedAt: Date;
+  version: string;
+}
 
 export type NotificationResult =
   | { ok: true }
@@ -15,7 +26,8 @@ function safeSubjectValue(value: string): string {
 }
 
 export async function notifyAuditRequest(
-  values: AuditLead
+  values: AuditLead,
+  consent: ConsentRecord
 ): Promise<NotificationResult> {
   const config = getResendConfig();
   const resend = new Resend(config.apiKey);
@@ -31,6 +43,7 @@ export async function notifyAuditRequest(
       `City: ${values.city}`,
       `Business type: ${values.businessType}`,
       `Email: ${values.email}`,
+      `Consent: accepted ${consent.acceptedAt.toISOString()} (policy version ${consent.version})`,
     ].join('\n'),
   });
 
@@ -38,7 +51,8 @@ export async function notifyAuditRequest(
 }
 
 export async function notifyQuoteRequest(
-  values: QuoteLead
+  values: QuoteLead,
+  consent: ConsentRecord
 ): Promise<NotificationResult> {
   const config = getResendConfig();
   const resend = new Resend(config.apiKey);
@@ -58,6 +72,7 @@ export async function notifyQuoteRequest(
       `Phone or WhatsApp: ${values.phoneOrWhatsapp ?? ''}`,
       `Website or Instagram: ${values.websiteOrInstagram ?? ''}`,
       `Country or region: ${values.countryRegion}`,
+      `Consent: accepted ${consent.acceptedAt.toISOString()} (policy version ${consent.version})`,
     ].join('\n'),
   });
 
