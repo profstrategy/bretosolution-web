@@ -41,5 +41,17 @@ export const seoContent = {
         'Choose a time to talk about how your restaurant appears on Google and AI search, and where to start.',
       canonicalPath: '/book-call',
     },
+    privacy: {
+      title: 'Privacy Policy',
+      description:
+        'How Bretosolution collects and uses information submitted through this website.',
+      canonicalPath: '/privacy',
+    },
+    terms: {
+      title: 'Terms of Service',
+      description:
+        'Terms for using the Bretosolution website and requesting an audit or quote.',
+      canonicalPath: '/terms',
+    },
   },
 } as const;
