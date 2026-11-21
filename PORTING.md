@@ -126,6 +126,9 @@ The following Calendly variables remain for the unimplemented integration:
 ### Completed
 
 - Migrated the marketing site to the Next.js App Router with static server-rendered routes for `/`, `/solutions`, `/pricing`, `/audit`, and `/book-call`.
+- Added static `/privacy` and `/terms` routes with real footer links and consent links for public form legal acknowledgements.
+- Added explicit, unchecked consent checkboxes to the audit and quote forms.
+- Added shared Zod consent validation and Prisma consent timestamp/version columns for both lead request models.
 - Preserved the existing section content, styling, public asset paths, form schemas, and booking placeholder.
 - Added the shared layout, existing font families/weights through `next/font`, and pre-paint theme initialization.
 - Added static SEO metadata, JSON-LD, a sitemap, and robots rules. `/audit` and `/book-call` are currently `noindex, follow`.
@@ -141,9 +144,9 @@ The following Calendly variables remain for the unimplemented integration:
 ### Still open
 
 - Run `npx prisma migrate deploy` against the intended Supabase database after setting `DATABASE_URL` and `DIRECT_URL`; this repository change did not contact the database.
+- Apply the checked-in `20261121171130_add_consent_columns` migration together with any pending migrations before testing consent database writes.
 - Verify real form persistence, Resend delivery, and rate-limit behavior behind the production proxy.
 - A real Calendly scheduling URL and booking integration.
-- Privacy and Terms pages.
 - Bracketed placeholders for business contact details, legal notices, and Calendly.
 - A 1200 × 630 social sharing image; no suitable existing image was found.
 
