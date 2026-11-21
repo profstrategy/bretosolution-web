@@ -281,7 +281,7 @@ export const homeContent = {
     ],
   },
   closingCta: {
-    heading: 'See how search and AI describe your restaurant.',
+    heading: 'See how search and AI describe your business.',
     primaryCta: {
       label: 'Request a Free AI Visibility Audit',
       href: routes.audit,

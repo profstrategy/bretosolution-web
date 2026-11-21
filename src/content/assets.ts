@@ -54,6 +54,18 @@ export const assets = {
     width: 1359,
     height: 637,
   },
+  ogImage: {
+    src: '/brand/export.webp',
+    alt: '',
+    width: 1200,
+    height: 630,
+  },
+  appleLogo: {
+    src: '/brand/apple-logo.webp',
+    alt: '',
+    width: 44,
+    height: 44,
+  }
 } as const satisfies Record<string, BrandAsset>;
 
 export const platformLogos: BrandAsset[] = [

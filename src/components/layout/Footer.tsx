@@ -71,7 +71,21 @@ export function Footer() {
           <p>
             &copy; {currentYear} {site.footer.rightsSuffix}
           </p>
-          <p>{site.footer.legalNotice}</p>
+          <p className="flex items-center gap-3">
+            <AppLink
+              href="/privacy"
+              className="inline-flex min-h-[44px] items-center rounded-[6px] transition-colors hover:text-[var(--accent)]"
+            >
+              Privacy
+            </AppLink>
+            <span aria-hidden="true">·</span>
+            <AppLink
+              href="/terms"
+              className="inline-flex min-h-[44px] items-center rounded-[6px] transition-colors hover:text-[var(--accent)]"
+            >
+              Terms
+            </AppLink>
+          </p>
         </div>
       </Container>
     </footer>

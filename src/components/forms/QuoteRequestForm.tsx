@@ -12,11 +12,14 @@ import {
 import { Button } from '@/components/ui/Button';
 import { pricingContent } from '@/content/pricing';
 import { submitQuoteRequest } from '@/lib/api/quote';
+import { TooManyAttemptsError } from '@/lib/api/submit';
 import { cn } from '@/lib/utils';
 import {
   quoteRequestSchema,
   type QuoteRequestValues,
 } from '@/schemas/quote';
+import { HONEYPOT_FIELD } from '@/schemas/honeypot';
+import { ConsentCheckbox } from '@/components/forms/ConsentCheckbox';
 
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -31,6 +34,9 @@ export function QuoteRequestForm() {
   const [step, setStep] = useState<1 | 2>(1);
   const [status, setStatus] = useState<FormStatus>('idle');
   const [reference, setReference] = useState<string>('');
+  const [submissionError, setSubmissionError] = useState<string>(
+    copy.errorMessage
+  );
 
   const {
     register,
@@ -55,7 +61,8 @@ export function QuoteRequestForm() {
       phoneOrWhatsapp: '',
       websiteOrInstagram: '',
       countryRegion: '',
-      company_site: '',
+      consent: false,
+      [HONEYPOT_FIELD]: '',
     },
   });
 
@@ -78,6 +85,7 @@ export function QuoteRequestForm() {
   const onSubmit = async (values: QuoteRequestValues) => {
     if (status === 'submitting') return;
     setStatus('submitting');
+    setSubmissionError(copy.errorMessage);
     try {
       const result = await submitQuoteRequest(values);
       if (result.ok) {
@@ -86,7 +94,10 @@ export function QuoteRequestForm() {
       } else {
         setStatus('error');
       }
-    } catch {
+    } catch (error) {
+      if (error instanceof TooManyAttemptsError) {
+        setSubmissionError(copy.tooManyAttemptsMessage);
+      }
       setStatus('error');
     }
   };
@@ -95,6 +106,7 @@ export function QuoteRequestForm() {
     reset();
     setReference('');
     setStep(1);
+    setSubmissionError(copy.errorMessage);
     setStatus('idle');
   };
 
@@ -142,13 +154,13 @@ export function QuoteRequestForm() {
         aria-hidden="true"
         className="pointer-events-none absolute -left-[9999px] h-0 w-0 overflow-hidden opacity-0"
       >
-        <label htmlFor="quote-company-site">{copy.honeypotLabel}</label>
+        <label htmlFor="quote-hp-trap">{copy.honeypotLabel}</label>
         <input
-          id="quote-company-site"
+          id="quote-hp-trap"
           type="text"
           tabIndex={-1}
           autoComplete="off"
-          {...register('company_site')}
+          {...register(HONEYPOT_FIELD)}
         />
       </div>
 
@@ -404,12 +416,20 @@ export function QuoteRequestForm() {
           </select>
         </FormField>
 
+        <ConsentCheckbox
+          id="quote-consent"
+          name="consent"
+          label={copy.consentLabel}
+          error={errors.consent?.message}
+          registration={register('consent')}
+        />
+
         {status === 'error' ? (
           <div
             role="alert"
             className="flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-[var(--accent)] bg-[var(--bg)] p-3.5 text-[14px] text-[var(--accent)]"
           >
-            <span>{copy.errorMessage}</span>
+            <span>{submissionError}</span>
             <Button variant="small" type="button" onClick={handleRetry}>
               {copy.retryLabel}
             </Button>

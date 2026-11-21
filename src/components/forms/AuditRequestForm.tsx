@@ -14,8 +14,11 @@ import {
   type AuditRequestValues,
 } from '@/schemas/audit';
 import { submitAuditRequest } from '@/lib/api/audit';
+import { TooManyAttemptsError } from '@/lib/api/submit';
 import { auditFormContent } from '@/content/audit';
 import { cn } from '@/lib/utils';
+import { HONEYPOT_FIELD } from '@/schemas/honeypot';
+import { ConsentCheckbox } from '@/components/forms/ConsentCheckbox';
 
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -23,6 +26,9 @@ export function AuditRequestForm() {
   const copy = auditFormContent;
   const [status, setStatus] = useState<FormStatus>('idle');
   const [reference, setReference] = useState<string>('');
+  const [submissionError, setSubmissionError] = useState<string>(
+    copy.errorMessage
+  );
 
   const {
     register,
@@ -41,13 +47,15 @@ export function AuditRequestForm() {
       city: '',
       businessType: 'Restaurant',
       email: '',
-      company_site: '',
+      consent: false,
+      [HONEYPOT_FIELD]: '',
     },
   });
 
   const onSubmit = async (values: AuditRequestValues) => {
     if (status === 'submitting') return;
     setStatus('submitting');
+    setSubmissionError(copy.errorMessage);
     try {
       const result = await submitAuditRequest(values);
       if (result.ok) {
@@ -56,7 +64,10 @@ export function AuditRequestForm() {
       } else {
         setStatus('error');
       }
-    } catch {
+    } catch (error) {
+      if (error instanceof TooManyAttemptsError) {
+        setSubmissionError(copy.tooManyAttemptsMessage);
+      }
       setStatus('error');
     }
   };
@@ -64,6 +75,7 @@ export function AuditRequestForm() {
   const handleReset = () => {
     reset();
     setReference('');
+    setSubmissionError(copy.errorMessage);
     setStatus('idle');
   };
 
@@ -113,7 +125,7 @@ export function AuditRequestForm() {
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+       onSubmit={handleSubmit(onSubmit, (errs) => console.log('FORM BLOCKED:', errs))}
       noValidate
       className="space-y-5 rounded-[16px] border border-[var(--line)] bg-[var(--alt)] p-[clamp(20px,3vw,36px)] shadow-[0_18px_48px_var(--shadow)]"
     >
@@ -122,13 +134,13 @@ export function AuditRequestForm() {
         aria-hidden="true"
         className="pointer-events-none absolute -left-[9999px] h-0 w-0 overflow-hidden opacity-0"
       >
-        <label htmlFor="audit-company-site">{copy.honeypotLabel}</label>
+        <label htmlFor="audit-hp-trap">{copy.honeypotLabel}</label>
         <input
-          id="audit-company-site"
+          id="audit-hp-trap"
           type="text"
           tabIndex={-1}
           autoComplete="off"
-          {...register('company_site')}
+          {...register(HONEYPOT_FIELD)}
         />
       </div>
 
@@ -243,13 +255,21 @@ export function AuditRequestForm() {
         />
       </FormField>
 
+      <ConsentCheckbox
+        id="audit-consent"
+        name="consent"
+        label={copy.consentLabel}
+        error={errors.consent?.message}
+        registration={register('consent')}
+      />
+
       {/* Inline error state if submission fails */}
       {status === 'error' ? (
         <div
           role="alert"
           className="flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-[var(--accent)] bg-[var(--bg)] p-3.5 text-[14px] text-[var(--accent)]"
         >
-          <span>{copy.errorMessage}</span>
+          <span>{submissionError}</span>
           <Button variant="small" type="button" onClick={handleRetry}>
             {copy.retryLabel}
           </Button>
