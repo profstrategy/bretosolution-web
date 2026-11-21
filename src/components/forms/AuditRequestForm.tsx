@@ -17,6 +17,8 @@ import { submitAuditRequest } from '@/lib/api/audit';
 import { TooManyAttemptsError } from '@/lib/api/submit';
 import { auditFormContent } from '@/content/audit';
 import { cn } from '@/lib/utils';
+import { HONEYPOT_FIELD } from '@/schemas/honeypot';
+import { ConsentCheckbox } from '@/components/forms/ConsentCheckbox';
 
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -45,7 +47,8 @@ export function AuditRequestForm() {
       city: '',
       businessType: 'Restaurant',
       email: '',
-      company_site: '',
+      consent: false,
+      [HONEYPOT_FIELD]: '',
     },
   });
 
@@ -122,7 +125,7 @@ export function AuditRequestForm() {
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+       onSubmit={handleSubmit(onSubmit, (errs) => console.log('FORM BLOCKED:', errs))}
       noValidate
       className="space-y-5 rounded-[16px] border border-[var(--line)] bg-[var(--alt)] p-[clamp(20px,3vw,36px)] shadow-[0_18px_48px_var(--shadow)]"
     >
@@ -131,13 +134,13 @@ export function AuditRequestForm() {
         aria-hidden="true"
         className="pointer-events-none absolute -left-[9999px] h-0 w-0 overflow-hidden opacity-0"
       >
-        <label htmlFor="audit-company-site">{copy.honeypotLabel}</label>
+        <label htmlFor="audit-hp-trap">{copy.honeypotLabel}</label>
         <input
-          id="audit-company-site"
+          id="audit-hp-trap"
           type="text"
           tabIndex={-1}
           autoComplete="off"
-          {...register('company_site')}
+          {...register(HONEYPOT_FIELD)}
         />
       </div>
 
@@ -251,6 +254,14 @@ export function AuditRequestForm() {
           {...register('email')}
         />
       </FormField>
+
+      <ConsentCheckbox
+        id="audit-consent"
+        name="consent"
+        label={copy.consentLabel}
+        error={errors.consent?.message}
+        registration={register('consent')}
+      />
 
       {/* Inline error state if submission fails */}
       {status === 'error' ? (

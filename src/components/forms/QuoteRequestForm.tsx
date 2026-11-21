@@ -18,6 +18,8 @@ import {
   quoteRequestSchema,
   type QuoteRequestValues,
 } from '@/schemas/quote';
+import { HONEYPOT_FIELD } from '@/schemas/honeypot';
+import { ConsentCheckbox } from '@/components/forms/ConsentCheckbox';
 
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -59,7 +61,8 @@ export function QuoteRequestForm() {
       phoneOrWhatsapp: '',
       websiteOrInstagram: '',
       countryRegion: '',
-      company_site: '',
+      consent: false,
+      [HONEYPOT_FIELD]: '',
     },
   });
 
@@ -151,13 +154,13 @@ export function QuoteRequestForm() {
         aria-hidden="true"
         className="pointer-events-none absolute -left-[9999px] h-0 w-0 overflow-hidden opacity-0"
       >
-        <label htmlFor="quote-company-site">{copy.honeypotLabel}</label>
+        <label htmlFor="quote-hp-trap">{copy.honeypotLabel}</label>
         <input
-          id="quote-company-site"
+          id="quote-hp-trap"
           type="text"
           tabIndex={-1}
           autoComplete="off"
-          {...register('company_site')}
+          {...register(HONEYPOT_FIELD)}
         />
       </div>
 
@@ -412,6 +415,14 @@ export function QuoteRequestForm() {
             ))}
           </select>
         </FormField>
+
+        <ConsentCheckbox
+          id="quote-consent"
+          name="consent"
+          label={copy.consentLabel}
+          error={errors.consent?.message}
+          registration={register('consent')}
+        />
 
         {status === 'error' ? (
           <div
