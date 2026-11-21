@@ -1,4 +1,5 @@
 import type { ZodError } from 'zod';
+import { HONEYPOT_FIELD } from '@/schemas/honeypot';
 
 const MAX_JSON_BODY_BYTES = 20 * 1024;
 
@@ -38,12 +39,12 @@ export function hasFilledHoneypot(value: unknown): boolean {
     typeof value !== 'object' ||
     value === null ||
     Array.isArray(value) ||
-    !('company_site' in value)
+    !(HONEYPOT_FIELD in value)
   ) {
     return false;
   }
 
-  const honeypot = value.company_site;
+  const honeypot = value[HONEYPOT_FIELD];
   return typeof honeypot === 'string' && honeypot.trim().length > 0;
 }
 

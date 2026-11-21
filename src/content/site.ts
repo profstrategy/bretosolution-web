@@ -14,7 +14,7 @@ export const routes = {
 export const calendlyUrl = '[Calendly scheduling link]';
 
 export const siteDescription =
-  'Bretosolution helps restaurants and hospitality businesses improve their visibility on Google and AI search platforms and builds websites that convert visitors into customers.';
+  'Bretosolution helps restaurants and hospitality and other businesses improve their visibility on Google and AI search platforms and builds websites that convert visitors into customers.';
 
 export const site = {
   name: 'Bretosolution',
@@ -28,14 +28,14 @@ export const site = {
   ] satisfies NavItem[],
   auditCtaLabel: 'Free AI Visibility Audit',
   longCtaLabel: 'Request a Free AI Visibility Audit',
-  contactEmail: '[Business email]',
-  contactPhone: '[Phone or WhatsApp]',
+  contactEmail: 'hello@bretosolution.com',
+  contactPhone: '0916 034 7172',
   domain: 'bretosolution.com',
   legalPrivacy: '[Privacy notice]',
   legalTerms: '[Terms of service]',
   contact: {
-    email: '[Business email]',
-    phone: '[Phone or WhatsApp]',
+    email: 'hello@bretosolution.com',
+    phone: '0916 034 7172',
   },
   legal: {
     privacy: '[Privacy notice]',

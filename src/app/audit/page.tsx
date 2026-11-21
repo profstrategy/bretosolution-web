@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     url: seoContent.pages.audit.canonicalPath,
   },
   robots: {
-    index: false,
+    index: true,
     follow: true,
   },
 };

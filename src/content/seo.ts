@@ -10,6 +10,8 @@ export const seoContent = {
   siteName: 'Bretosolution',
   siteUrl,
   logoPath: assets.bretoLogo.src,
+  openGraphImagePath: assets.ogImage.src,
+  appleTouchIconPath: assets.appleLogo.src,
   pages: {
     home: {
       title: 'AI Search Visibility',
@@ -18,7 +20,7 @@ export const seoContent = {
       canonicalPath: '/',
     },
     solutions: {
-      title: 'How Guests Find and Choose a Restaurant',
+      title: 'How Guests Find and Choose a Business',
       description:
         'Search visibility, a website that converts, and the monthly work that keeps both improving. Each service stands alone and works better together.',
       canonicalPath: '/solutions',
@@ -26,7 +28,7 @@ export const seoContent = {
     pricing: {
       title: 'Request a Quote',
       description:
-        'Describe your restaurant and the problem you want solved. We reply with a scoped quote, not a generic package price.',
+        'Describe your business and the problem you want solved. We reply with a scoped quote, not a generic package price.',
       canonicalPath: '/pricing',
     },
     audit: {

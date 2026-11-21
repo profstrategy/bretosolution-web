@@ -35,7 +35,7 @@ export async function recordRateLimitHit(
   });
 
   return prisma.$transaction(async (transaction) => {
-    await transaction.$queryRaw`
+    await transaction.$executeRaw`
       SELECT pg_advisory_xact_lock(hashtext(${bucket}), hashtext(${ipHash}))
     `;
 

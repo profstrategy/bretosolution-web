@@ -19,14 +19,38 @@ export const metadata: Metadata = {
     default: `${seoContent.pages.home.title} | Bretosolution`,
     template: '%s | Bretosolution',
   },
+  icons: {
+    icon: [
+      { url: seoContent.logoPath, type: 'image/png' },
+    ],
+    apple: [
+      { url: seoContent.appleTouchIconPath, type: 'image/png' },
+    ]
+  },
   applicationName: seoContent.siteName,
   openGraph: {
+    title: seoContent.pages.home.title,
+    description: seoContent.pages.home.description,
+    url: seoContent.siteUrl,
     type: 'website',
     siteName: seoContent.siteName,
+    images: [ { url: seoContent.openGraphImagePath } ],
     locale: 'en',
   },
   twitter: {
     card: 'summary',
+    title: seoContent.pages.home.title,
+    description: seoContent.pages.home.description,
+    images: [ seoContent.openGraphImagePath ],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    nocache: true,
+    googleBot: { 
+      index: true,
+      follow: true,
+    }
   },
 };
 

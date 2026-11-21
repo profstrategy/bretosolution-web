@@ -16,8 +16,8 @@ export const privacyPolicy: LegalSection[] = [
     heading: 'Who we are and how to contact us',
     paragraphs: [
       'Bretosolution operates this website at bretosolution.com. We provide information about digital visibility and website services, and we handle requests submitted through our forms.',
-      'Our registered business name is [[PLACEHOLDER: registered business name]], and our registered business address is [[PLACEHOLDER: registered business address]].',
-      'You can send privacy questions to [[PLACEHOLDER: privacy contact email]].',
+      'Our registered business name is BRETO DIGITAL SOLUTIONS AGENCY, and our registered business address is Jakana Plaza, Lagos Street,Maiduguri Borno State.',
+      'You can send privacy questions to hello@bretosolution.com.',
     ],
   },
   {
@@ -50,7 +50,7 @@ export const privacyPolicy: LegalSection[] = [
     heading: 'Who receives it',
     paragraphs: [
       'Audit and quote information is stored in our PostgreSQL database and may be sent to our nominated email recipient through Resend for lead notification.',
-      'The database hosting provider is [[PLACEHOLDER: database host provider name or region]]. The website hosting provider is [[PLACEHOLDER: website hosting provider name or region]]. The Resend account region or processing location is [[PLACEHOLDER: Resend account region or processing location]].',
+      'The database hosting provider is SUPABASE. The website hosting provider is godaddy. The Resend account region or processing location is US Region.',
       'Calendly may receive the information you enter if you use a live Calendly scheduling page. Its use is not active today because the scheduling link remains a placeholder.',
       'Next font generation is configured for Inter, Playfair Display, JetBrains Mono, and Satisfy; the code does not identify a separate browser-side font service or script provider.',
     ],
@@ -67,7 +67,7 @@ export const privacyPolicy: LegalSection[] = [
     id: 'how-long-we-keep-it',
     heading: 'How long we keep it',
     paragraphs: [
-      'Audit and quote lead records are kept for [[PLACEHOLDER: retention period for leads]]. The code does not currently contain a lead deletion or retention rule, so records remain until an operator changes or deletes them.',
+      'Audit and quote lead records are kept for 48 hours. The code does not currently contain a lead deletion or retention rule, so records remain until an operator changes or deletes them.',
       'Rate-limit records are automatically deleted after 24 hours, as implemented in the server code.',
       'The code does not establish a retention period for database backups or for information held by the email provider.',
     ],
@@ -115,7 +115,7 @@ export const privacyPolicy: LegalSection[] = [
     id: 'contact',
     heading: 'Contact',
     paragraphs: [
-      'For privacy requests or questions, contact [[PLACEHOLDER: privacy contact email]].',
+      'For privacy requests or questions, contact hello@bretosolution.com.',
     ],
   },
 ];
@@ -208,14 +208,14 @@ export const termsOfService: LegalSection[] = [
     heading: 'Governing law',
     paragraphs: [
       'These terms are governed by the laws of Nigeria.',
-      'Courts in [[PLACEHOLDER: state or city for courts]] have jurisdiction to the extent allowed by law.',
+      'Courts in Borno State have jurisdiction to the extent allowed by law.',
     ],
   },
   {
     id: 'contact',
     heading: 'Contact',
     paragraphs: [
-      'Questions about these terms may be sent to [[PLACEHOLDER: privacy contact email]].',
+      'Questions about these terms may be sent to hello@bretosolution.com.',
     ],
   },
 ];

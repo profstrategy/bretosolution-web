@@ -5,7 +5,7 @@ import { CONSENT_ERROR_MESSAGE } from '@/content/legal';
 export const auditPageContent = {
   documentTitle: 'Request a free AI visibility audit | Bretosolution',
   eyebrow: 'Free AI visibility audit',
-  heading: 'Find out how your restaurant appears to customers',
+  heading: 'Find out how your business appears to customers',
   headingScript: 'who ask AI.',
   description:
     'Tell us about your business. We review each request, run the tests described on our site and reply by email with what we find.',
@@ -18,15 +18,15 @@ export const auditPageContent = {
 
 export const auditFormContent = {
   businessNameLabel: 'Business name',
-  businessNamePlaceholder: '[Your restaurant or venue]',
-  websiteLabel: 'Website or Instagram page',
+  businessNamePlaceholder: '[Your restaurant or business name]',
+  websiteLabel: 'Website or Social page',
   websitePlaceholder: '[Link, or “none yet”]',
   cityLabel: 'City',
   cityPlaceholder: '[City]',
   businessTypeLabel: 'Business type',
   businessTypes: BUSINESS_TYPES satisfies readonly BusinessType[],
   emailLabel: 'Business email',
-  emailPlaceholder: '[name@yourbusiness.com]',
+  emailPlaceholder: '[name@yourbusiness or gmail.com]',
   honeypotLabel: 'Leave this field empty',
   consentLabel:
     'I agree to the Terms of Service and have read the Privacy Policy.',

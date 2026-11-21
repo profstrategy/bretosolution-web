@@ -21,7 +21,7 @@ export const solutionsContent = {
   hero: {
     eyebrow: 'Solutions',
     heading: 'Built around how guests',
-    headingScript: 'find and choose a restaurant.',
+    headingScript: 'find and choose a business.',
     description:
       'Search visibility, a website that converts, and the monthly work that keeps both improving. Each service stands alone and works better together.',
     primaryCta: {
@@ -73,7 +73,7 @@ export const solutionsContent = {
   },
   websiteDevelopment: {
     eyebrow: '02 · Website Development',
-    heading: 'A restaurant website built in four phases.',
+    heading: 'A business website built in four phases.',
     description:
       'A typical project runs four to six weeks. The time depends on scope, integrations, content and how quickly your team can send what we need.',
     phases: [
@@ -87,13 +87,13 @@ export const solutionsContent = {
         phase: 'Phase 2',
         title: 'Website development',
         description:
-          'Responsive site, menu and service pages, location and contact details, booking or ordering integration, conversion-focused design.',
+          'Responsive site, menu and service pages, admin dashboard, location and contact details, booking or ordering integration, conversion-focused design.',
       },
       {
         phase: 'Phase 3',
         title: 'Search optimization',
         description:
-          'Technical SEO, crawlability and indexing checks, structured data that matches the page, Business Profile review, content improvements.',
+          'Technical SEO, crawlability and indexing checks, structured data that matches the page, Business Profile review, AI Search readiness, content improvements.',
       },
       {
         phase: 'Phase 4',
@@ -106,14 +106,14 @@ export const solutionsContent = {
     addOnsDescription:
       'When a restaurant needs more than a strong website, we scope the extras separately so the base project stays clear.',
     addOns: [
-      {
-        title: 'Online ordering and payments',
-        detail: 'menu-to-checkout flow with a Nigerian payment provider',
-      },
-      {
-        title: 'Admin dashboard',
-        detail: 'monitoring, payment tracking and blog management',
-      },
+      // {
+      //   title: 'Online ordering and payments',
+      //   detail: 'menu-to-checkout flow with a Nigerian payment provider',
+      // },
+      // {
+      //   title: 'Admin dashboard',
+      //   detail: 'monitoring, payment tracking and blog management',
+      // },
       {
         title: 'Chatbot',
         detail:
