@@ -115,3 +115,6 @@ notification, and will remain before the send path.
 - The required Phase 0 plan is the only file to be written in this phase.
   Builds, type checks, lint, dependency installation, and commits are deferred
   until the corresponding approved implementation phase.
+- After Phase 2, the audit confirmation preheader and delivery sentence were
+  changed to say “shortly” instead of “within 24 hours”. The user directed
+  preserving that updated wording.

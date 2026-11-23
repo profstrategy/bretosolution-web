@@ -2,12 +2,12 @@ import { site } from '@/content/site';
 
 export const auditConfirmationCopy = {
   subject: "We've received your free AI Visibility Audit request",
-  preheader: 'Your audit will be with you within 24 hours.',
+  preheader: 'Your audit will be with you shortly',
   greeting: 'Hi {businessName} team,',
   fallbackGreeting: 'Hi there,',
   paragraphs: [
     "Thank you for requesting our free AI Visibility Audit. We're here to help your business show up where customers search today, on Google and on AI platforms, so that more of them find you and choose you.",
-    'Our team is now preparing your audit. We will send it to you within the next 24 hours.',
+    'Our team is now preparing your audit. We will send it to you shortly.',
     "You don't need to do anything in the meantime. If you want to add anything, just reply to this email.",
   ],
   signoff: 'The Bretosolution team',
