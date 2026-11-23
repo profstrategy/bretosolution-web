@@ -42,11 +42,13 @@ stacks.
 
 **Change**
 
-- `package.json` and `package-lock.json` (only add `@react-email/components`
-  and `@react-email/render`; exact versions will be selected and recorded when
-  Phase 1 is approved)
+- `package.json` and `package-lock.json` (only add
+  `@react-email/components@^1.0.12` and `@react-email/render@^2.3.1`; the lockfile
+  resolves them to 1.0.12 and 2.3.1)
 - `src/content/site.ts` (add/use the supplied contact email and postal address)
 - `src/lib/server/notify.ts`
+- `src/lib/server/confirmationLimit.ts`
+- `src/lib/server/leadNotifications.ts`
 - `src/app/api/audit-requests/route.ts`
 - `src/app/api/quote-requests/route.ts`
 - `scripts/smoke-api.md`
@@ -64,9 +66,11 @@ The installed versions are `@react-email/components` 1.0.12 and
 `@react-email/render` 2.3.1. The render package's installed Node type
 declaration defines `render(node: React.ReactNode, options?: Options):
 Promise<string>` and `toPlainText(html: string, options?: HtmlToTextOptions):
-string`. The official Render and Section/Row/Column docs were checked; the
-plain-text version will be generated from the same component's rendered HTML
-with `toPlainText(html)`. The installed Resend 6.39.0 package's type declaration defines
+string`. The official Render and Section/Row/Column docs were checked. The
+plain-text version uses `toPlainText(html)` from the same component's rendered
+HTML; confirmation text appends the literal unsubscribe URI because HTML-to-text
+conversion renders a `mailto:` link without its scheme. The installed Resend
+6.39.0 package's type declaration defines
 `resend.emails.send(payload, requestOptions?)` as returning
 `Promise<CreateEmailResponse>`. Its email payload supports `html`, `text`,
 `replyTo`, and `headers`; the installed README also uses the camel-case

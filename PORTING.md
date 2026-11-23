@@ -53,12 +53,15 @@ Replace the `useEffect` `document.title` assignments in `src/pages/*.tsx` with N
 
 **Implemented:** `src/app/api/audit-requests/route.ts` and
 `src/app/api/quote-requests/route.ts` are Node.js, force-dynamic POST routes.
-They enforce JSON and 20 KB limits, preserve the `company_site` honeypot,
+They enforce JSON and 20 KB limits, preserve the `hp_trap_7q` honeypot,
 validate with the existing Zod schemas, rate-limit to five requests per hour
 per hashed IP and route bucket, and persist the approved form fields through
-Prisma. Raw IP addresses are not stored. Resend sends a plain-text lead
-notification after persistence; a notification failure does not discard the
-saved request.
+Prisma. Raw IP addresses are not stored. Resend sends a branded HTML and
+plain-text owner notification with reply-to set to the lead's address, then
+sends the matching confirmation when the combined total, including the current
+request, is at most two submissions across both forms in the previous 24 hours.
+Notifications are independent; failures do not discard the saved request. A
+filled `hp_trap_7q` honeypot returns before saving or sending either email.
 
 The routes return HTTP `201` with `{ ok: true, id }`. The client helpers
 `submitAuditRequest` and `submitQuoteRequest` call those routes with a
@@ -132,7 +135,7 @@ The following Calendly variables remain for the unimplemented integration:
 - Preserved the existing section content, styling, public asset paths, form schemas, and booking placeholder.
 - Added the shared layout, existing font families/weights through `next/font`, and pre-paint theme initialization.
 - Added static SEO metadata, JSON-LD, a sitemap, and robots rules. `/audit` and `/book-call` are currently `noindex, follow`.
-- Added dynamic audit and quote API routes, PostgreSQL Prisma models/migration, rate limiting, and Resend lead notifications. The form helpers now call those routes.
+- Added dynamic audit and quote API routes, PostgreSQL Prisma models/migration, rate limiting, branded Resend owner notifications, and confirmation emails with a shared recipient limit across forms. The form helpers now call those routes.
 
 ### Deviations and verification limits
 
@@ -145,7 +148,7 @@ The following Calendly variables remain for the unimplemented integration:
 
 - Run `npx prisma migrate deploy` against the intended Supabase database after setting `DATABASE_URL` and `DIRECT_URL`; this repository change did not contact the database.
 - Apply the checked-in `20261121171130_add_consent_columns` migration together with any pending migrations before testing consent database writes.
-- Verify real form persistence, Resend delivery, and rate-limit behavior behind the production proxy.
+- Verify real form persistence, Resend delivery, confirmation recipient limits, and rate-limit behavior behind the production proxy.
 - A real Calendly scheduling URL and booking integration.
 - Bracketed placeholders for business contact details, legal notices, and Calendly.
 - A 1200 × 630 social sharing image; no suitable existing image was found.
