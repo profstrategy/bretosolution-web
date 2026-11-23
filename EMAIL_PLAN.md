@@ -105,10 +105,10 @@ notification, and will remain before the send path.
   Consent. Quote notification fields are Business type, Help needed, Main
   challenge, Contact name, Business name, Email, Phone or WhatsApp, Website or
   Instagram, Country or region, and Consent. Both include the acceptance
-  timestamp and policy version in the consent line; the policy version is
-  internal metadata, so the proposed owner template must not expose it if
-  “never put internal IDs in any email” is interpreted to include policy
-  versions. The received timestamp can be displayed separately.
+  timestamp and policy version in the consent line. The policy version is the
+  public legal-policy version, not a lead/internal ID; the templates include it
+  but do not expose database IDs. The received timestamp is displayed
+  separately.
 - Optional quote fields are currently represented as empty strings in some
   route inputs and as `undefined` in the schema type; templates will display
   empty values as “Not provided”.
