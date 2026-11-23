@@ -35,6 +35,13 @@ export const emailFooterCopy = {
   postalAddress: site.postalAddress,
 } as const;
 
+export function getUnsubscribeUrl(): string {
+  return (
+    `mailto:${site.contactEmail}?subject=${encodeURIComponent(emailFooterCopy.unsubscribeSubject)}` +
+    `&body=${encodeURIComponent(emailFooterCopy.unsubscribeBody)}`
+  );
+}
+
 export const ownerNotificationCopy = {
   audit: {
     title: 'New audit request',

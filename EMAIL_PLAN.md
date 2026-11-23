@@ -31,6 +31,7 @@ stacks.
 
 - `src/content/emails.ts`
 - `src/emails/tokens.ts`
+- `src/emails/render.tsx`
 - `src/emails/components/EmailLayout.tsx`
 - `src/emails/AuditRequestNotification.tsx`
 - `src/emails/QuoteRequestNotification.tsx`
@@ -59,21 +60,17 @@ which already defaults to `https://bretosolution.com` and accepts
 
 ## Email rendering and sending APIs
 
-The installed Resend 6.39.0 package's type declaration defines
+The installed versions are `@react-email/components` 1.0.12 and
+`@react-email/render` 2.3.1. The render package's installed Node type
+declaration defines `render(node: React.ReactNode, options?: Options):
+Promise<string>` and `toPlainText(html: string, options?: HtmlToTextOptions):
+string`. The official Render and Section/Row/Column docs were checked; the
+plain-text version will be generated from the same component's rendered HTML
+with `toPlainText(html)`. The installed Resend 6.39.0 package's type declaration defines
 `resend.emails.send(payload, requestOptions?)` as returning
 `Promise<CreateEmailResponse>`. Its email payload supports `html`, `text`,
 `replyTo`, and `headers`; the installed README also uses the camel-case
 `replyTo` option. Sending will pass both `html` and `text`, never `react`.
-
-Neither `@react-email/components` nor `@react-email/render` is installed or
-present in `package-lock.json` now, so their installed types and package docs
-cannot be inspected during this read-only phase. The React Email render docs
-describe awaiting `render(<Template ... />)` for an HTML string and passing
-that HTML to `toPlainText(html)` for the plain-text string. Those documented
-calls are the intended API, but the precise installed signatures and package
-versions remain unverified until the packages are added in an approved phase.
-I will inspect both installed packages' types and docs before implementing
-their calls.
 
 ## Auto-reply abuse guard
 
