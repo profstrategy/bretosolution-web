@@ -7,7 +7,11 @@ import {
   jsonResponse,
   readJsonBody,
 } from '@/lib/server/http';
-import { notifyQuoteRequest } from '@/lib/server/notify';
+import {
+  notifyQuoteRequest,
+  sendQuoteConfirmation,
+} from '@/lib/server/notify';
+import { sendLeadNotifications } from '@/lib/server/leadNotifications';
 import {
   recordRateLimitHit,
   type RateLimitResult,
@@ -83,26 +87,22 @@ export async function POST(request: Request): Promise<Response> {
     return jsonError('Unable to save your request right now.', 500);
   }
 
-  try {
-    const notification = await notifyQuoteRequest(values, {
-      acceptedAt: consentAcceptedAt,
-      version: LEGAL_VERSION,
-    });
-    if (!notification.ok) {
-      console.error('Quote request notification failed.', notification.error);
-    } else {
-      try {
-        await getPrismaClient().quoteRequest.update({
-          where: { id },
-          data: { notifiedAt: new Date() },
-        });
-      } catch (error) {
-        console.error('Quote request notification status update failed.', error);
-      }
-    }
-  } catch (error) {
-    console.error('Quote request notification failed.', error);
-  }
+  await sendLeadNotifications({
+    label: 'Quote request',
+    recipientEmail: values.email,
+    notifyOwner: () =>
+      notifyQuoteRequest(values, {
+        acceptedAt: consentAcceptedAt,
+        version: LEGAL_VERSION,
+      }),
+    sendConfirmation: () => sendQuoteConfirmation(values),
+    updateNotifiedAt: async () => {
+      await getPrismaClient().quoteRequest.update({
+        where: { id },
+        data: { notifiedAt: new Date() },
+      });
+    },
+  });
 
   return jsonResponse({ ok: true, id }, 201);
 }

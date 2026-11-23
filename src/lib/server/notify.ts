@@ -1,7 +1,19 @@
+import { createElement } from 'react';
 import { Resend } from 'resend';
 import type { AuditRequestValues } from '@/schemas/audit';
 import type { QuoteRequestValues } from '@/schemas/quote';
 import { HONEYPOT_FIELD } from '@/schemas/honeypot';
+import {
+  auditConfirmationCopy,
+  ownerNotificationCopy,
+  quoteConfirmationCopy,
+} from '@/content/emails';
+import { site } from '@/content/site';
+import { AuditConfirmation } from '@/emails/AuditConfirmation';
+import { AuditRequestNotification } from '@/emails/AuditRequestNotification';
+import { QuoteConfirmation } from '@/emails/QuoteConfirmation';
+import { QuoteRequestNotification } from '@/emails/QuoteRequestNotification';
+import { renderEmail } from '@/emails/render';
 import { getResendConfig } from '@/lib/server/env';
 
 type AuditLead = Omit<
@@ -31,20 +43,20 @@ export async function notifyAuditRequest(
 ): Promise<NotificationResult> {
   const config = getResendConfig();
   const resend = new Resend(config.apiKey);
+  const { html, text } = await renderEmail(
+    createElement(AuditRequestNotification, {
+      values,
+      consent,
+      receivedAt: consent.acceptedAt,
+    })
+  );
   const { error } = await resend.emails.send({
     from: config.from,
     to: [config.to],
     subject: `New audit request: ${safeSubjectValue(values.businessName)}`,
-    text: [
-      'New audit request',
-      '',
-      `Business name: ${values.businessName}`,
-      `Website or Instagram: ${values.websiteOrInstagram}`,
-      `City: ${values.city}`,
-      `Business type: ${values.businessType}`,
-      `Email: ${values.email}`,
-      `Consent: accepted ${consent.acceptedAt.toISOString()} (policy version ${consent.version})`,
-    ].join('\n'),
+    replyTo: values.email,
+    html,
+    text,
   });
 
   return error ? { ok: false, error } : { ok: true };
@@ -56,24 +68,68 @@ export async function notifyQuoteRequest(
 ): Promise<NotificationResult> {
   const config = getResendConfig();
   const resend = new Resend(config.apiKey);
+  const { html, text } = await renderEmail(
+    createElement(QuoteRequestNotification, {
+      values,
+      consent,
+      receivedAt: consent.acceptedAt,
+    })
+  );
   const { error } = await resend.emails.send({
     from: config.from,
     to: [config.to],
     subject: `New quote request: ${safeSubjectValue(values.businessName)}`,
-    text: [
-      'New quote request',
-      '',
-      `Business type: ${values.businessType}`,
-      `Help needed: ${values.helpNeeded}`,
-      `Main challenge: ${values.mainChallenge ?? ''}`,
-      `Contact name: ${values.contactName}`,
-      `Business name: ${values.businessName}`,
-      `Email: ${values.email}`,
-      `Phone or WhatsApp: ${values.phoneOrWhatsapp ?? ''}`,
-      `Website or Instagram: ${values.websiteOrInstagram ?? ''}`,
-      `Country or region: ${values.countryRegion}`,
-      `Consent: accepted ${consent.acceptedAt.toISOString()} (policy version ${consent.version})`,
-    ].join('\n'),
+    replyTo: values.email,
+    html,
+    text,
+  });
+
+  return error ? { ok: false, error } : { ok: true };
+}
+
+export async function sendAuditConfirmation(
+  values: AuditLead
+): Promise<NotificationResult> {
+  const config = getResendConfig();
+  const resend = new Resend(config.apiKey);
+  const { html, text } = await renderEmail(
+    createElement(AuditConfirmation, { businessName: values.businessName }),
+    { includeUnsubscribeUrl: true }
+  );
+  const { error } = await resend.emails.send({
+    from: config.from,
+    to: [values.email],
+    subject: auditConfirmationCopy.subject,
+    replyTo: site.contactEmail,
+    headers: {
+      'List-Unsubscribe': `<mailto:${site.contactEmail}?subject=Unsubscribe>`,
+    },
+    html,
+    text,
+  });
+
+  return error ? { ok: false, error } : { ok: true };
+}
+
+export async function sendQuoteConfirmation(
+  values: QuoteLead
+): Promise<NotificationResult> {
+  const config = getResendConfig();
+  const resend = new Resend(config.apiKey);
+  const { html, text } = await renderEmail(
+    createElement(QuoteConfirmation, { contactName: values.contactName }),
+    { includeUnsubscribeUrl: true }
+  );
+  const { error } = await resend.emails.send({
+    from: config.from,
+    to: [values.email],
+    subject: quoteConfirmationCopy.subject,
+    replyTo: site.contactEmail,
+    headers: {
+      'List-Unsubscribe': `<mailto:${site.contactEmail}?subject=Unsubscribe>`,
+    },
+    html,
+    text,
   });
 
   return error ? { ok: false, error } : { ok: true };
