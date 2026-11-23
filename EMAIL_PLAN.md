@@ -96,9 +96,9 @@ notification, and will remain before the send path.
 - The privacy text in `src/content/legal.ts` gives a different, less complete
   postal form (`Jakana Plaza, Lagos Street,Maiduguri Borno State`). Per
   instruction, that existing legal text will not be edited. The requested
-  cleaned address is `['20 Jakana Plaza', 'Lagos Street', 'Maiduguri, Borno State', '211273', 'Nigeria']`;
-  please confirm the street and postcode before those facts are treated as
-  final.
+  address was corrected and confirmed as
+  `['35, Jakana Plaza', 'Lagos Street', 'Maiduguri, Borno State', '600215', 'Nigeria']`;
+  the legal text will remain unchanged.
 - `notify.ts` currently sends plain text only. Audit notification fields are
   Business name, Website or Instagram, City, Business type, Email, and
   Consent. Quote notification fields are Business type, Help needed, Main
