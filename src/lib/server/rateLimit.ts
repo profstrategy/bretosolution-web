@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { getPrismaClient } from '@/lib/db';
 import { getRateLimitSalt } from '@/lib/server/env';
 
-const REQUEST_LIMIT = 5;
+const REQUEST_LIMIT = 10;
 const WINDOW_MS = 60 * 60 * 1000;
 const RETENTION_MS = 24 * 60 * 60 * 1000;
 
