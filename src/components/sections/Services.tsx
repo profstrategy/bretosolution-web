@@ -80,9 +80,9 @@ export function Services() {
                     decoding="async"
                   />
                 </div>
-                <figcaption className="mt-[8px] text-center font-[family-name:var(--font-sans)] text-[13px] leading-[1.5] text-[var(--muted)]">
+                {/* <figcaption className="mt-[8px] text-center font-[family-name:var(--font-sans)] text-[13px] leading-[1.5] text-[var(--muted)]">
                   {services.caption}
-                </figcaption>
+                </figcaption> */}
               </figure>
             </div>
           </div>
