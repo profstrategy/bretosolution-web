@@ -187,9 +187,9 @@ export function ProblemSolution() {
         </div>
 
         {/* Footnote */}
-        <p className="mx-auto mt-[48px] max-w-[70ch] text-center font-[family-name:var(--font-sans)] text-[13px] text-[var(--muted)]">
+        {/* <p className="mx-auto mt-[48px] max-w-[70ch] text-center font-[family-name:var(--font-sans)] text-[13px] text-[var(--muted)]">
           {problemSolution.footnote}
-        </p>
+        </p> */}
       </Container>
     </Section>
   );

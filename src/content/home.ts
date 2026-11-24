@@ -122,8 +122,8 @@ export const homeContent = {
       resultNumber: '30+',
       resultSuffix: ' online orders / month',
     },
-    footnote:
-      'Illustrative scenario to explain the idea. These figures are not a client result and not a promise of outcomes.',
+    // footnote:
+    //   'Illustrative scenario to explain the idea. These figures are not a client result and not a promise of outcomes.',
   },
   principles: {
     eyebrow: 'How we work',
@@ -165,8 +165,8 @@ export const homeContent = {
         href: `${routes.solutions}#ongoing-digital-growth`,
       },
     ] satisfies ServiceLink[],
-    caption:
-      'Example restaurant admin dashboard with demo data, beside a local search results view. Google Maps is a trademark of Google LLC.',
+    // caption:
+    //   'Example restaurant admin dashboard with demo data, beside a local search results view. Google Maps is a trademark of Google LLC.',
   },
   auditProcess: {
     eyebrow: 'The free audit',
