@@ -7,7 +7,11 @@ import {
   jsonResponse,
   readJsonBody,
 } from '@/lib/server/http';
-import { notifyAuditRequest } from '@/lib/server/notify';
+import {
+  notifyAuditRequest,
+  sendAuditConfirmation,
+} from '@/lib/server/notify';
+import { sendLeadNotifications } from '@/lib/server/leadNotifications';
 import {
   recordRateLimitHit,
   type RateLimitResult,
@@ -79,26 +83,22 @@ export async function POST(request: Request): Promise<Response> {
     return jsonError('Unable to save your request right now.', 500);
   }
 
-  try {
-    const notification = await notifyAuditRequest(values, {
-      acceptedAt: consentAcceptedAt,
-      version: LEGAL_VERSION,
-    });
-    if (!notification.ok) {
-      console.error('Audit request notification failed.', notification.error);
-    } else {
-      try {
-        await getPrismaClient().auditRequest.update({
-          where: { id },
-          data: { notifiedAt: new Date() },
-        });
-      } catch (error) {
-        console.error('Audit request notification status update failed.', error);
-      }
-    }
-  } catch (error) {
-    console.error('Audit request notification failed.', error);
-  }
+  await sendLeadNotifications({
+    label: 'Audit request',
+    recipientEmail: values.email,
+    notifyOwner: () =>
+      notifyAuditRequest(values, {
+        acceptedAt: consentAcceptedAt,
+        version: LEGAL_VERSION,
+      }),
+    sendConfirmation: () => sendAuditConfirmation(values),
+    updateNotifiedAt: async () => {
+      await getPrismaClient().auditRequest.update({
+        where: { id },
+        data: { notifiedAt: new Date() },
+      });
+    },
+  });
 
   return jsonResponse({ ok: true, id }, 201);
 }

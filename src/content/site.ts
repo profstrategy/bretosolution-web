@@ -13,6 +13,15 @@ export const routes = {
 
 export const calendlyUrl = '[Calendly scheduling link]';
 
+const contactEmail = 'hello@bretosolution.com';
+const postalAddress = [
+  '35, Jakana Plaza',
+  'Lagos Street',
+  'Maiduguri, Borno State',
+  '600215',
+  'Nigeria',
+] as const;
+
 export const siteDescription =
   'Bretosolution helps restaurants and hospitality and other businesses improve their visibility on Google and AI search platforms and builds websites that convert visitors into customers.';
 
@@ -28,13 +37,14 @@ export const site = {
   ] satisfies NavItem[],
   auditCtaLabel: 'Free AI Visibility Audit',
   longCtaLabel: 'Request a Free AI Visibility Audit',
-  contactEmail: 'hello@bretosolution.com',
+  contactEmail,
+  postalAddress,
   contactPhone: '0916 034 7172',
   domain: 'bretosolution.com',
   legalPrivacy: '[Privacy notice]',
   legalTerms: '[Terms of service]',
   contact: {
-    email: 'hello@bretosolution.com',
+    email: contactEmail,
     phone: '0916 034 7172',
   },
   legal: {
@@ -62,7 +72,7 @@ export const site = {
     ] satisfies NavItem[],
     contactEyebrow: 'Contact',
     contactItems: [
-      'hello@bretosolution.com'
+      contactEmail
     ],
     rightsSuffix: 'Bretosolution. All rights reserved.',
     legalNotice: '[Privacy notice] · [Terms of service]',

@@ -2,8 +2,10 @@
 
 These are manual PowerShell commands, not CI tests. Run them against a local
 server after configuring a test database, applying the migration, and setting
-the required environment variables. The valid audit and quote requests are
-stored and send a Resend notification, so use test data and a test recipient.
+the required environment variables. Every valid audit and quote request is
+stored and sends an owner notification; requests within the recipient limit
+also send a confirmation. Replace `your-owned-address@example.com` in the
+payloads with an address you own before running these tests.
 
 The examples create temporary request bodies under the system temp directory.
 The six-request tests use a reserved test IP in `X-Forwarded-For`; use these
@@ -27,17 +29,17 @@ $quoteIgnoredConsentMetadataPath = Join-Path $tempDir 'quote-ignored-consent-met
 $honeypotPayloadPath = Join-Path $tempDir 'honeypot.json'
 $largePayloadPath = Join-Path $tempDir 'large.txt'
 
-[System.IO.File]::WriteAllText($auditPayloadPath, '{"businessName":"Smoke Test Bistro","websiteOrInstagram":"https://example.com","city":"Lagos","businessType":"Restaurant","email":"owner@example.com","consent":true,"hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
-[System.IO.File]::WriteAllText($quotePayloadPath, '{"businessType":"Restaurant","helpNeeded":"AI Visibility Optimization","mainChallenge":"Smoke test","contactName":"Smoke Test Owner","businessName":"Smoke Test Bistro","email":"owner@example.com","phoneOrWhatsapp":"","websiteOrInstagram":"https://example.com","countryRegion":"Nigeria","consent":true,"hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
+[System.IO.File]::WriteAllText($auditPayloadPath, '{"businessName":"Smoke Test Bistro","websiteOrInstagram":"https://example.com","city":"Lagos","businessType":"Restaurant","email":"your-owned-address@example.com","consent":true,"hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
+[System.IO.File]::WriteAllText($quotePayloadPath, '{"businessType":"Restaurant","helpNeeded":"AI Visibility Optimization","mainChallenge":"Smoke test","contactName":"Smoke Test Owner","businessName":"Smoke Test Bistro","email":"your-owned-address@example.com","phoneOrWhatsapp":"","websiteOrInstagram":"https://example.com","countryRegion":"Nigeria","consent":true,"hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
 [System.IO.File]::WriteAllText($missingPayloadPath, '{}', [System.Text.Encoding]::ASCII)
-[System.IO.File]::WriteAllText($auditConsentMissingPath, '{"businessName":"Smoke Test Bistro","websiteOrInstagram":"https://example.com","city":"Lagos","businessType":"Restaurant","email":"owner@example.com","hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
-[System.IO.File]::WriteAllText($auditConsentFalsePath, '{"businessName":"Smoke Test Bistro","websiteOrInstagram":"https://example.com","city":"Lagos","businessType":"Restaurant","email":"owner@example.com","consent":false,"hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
-[System.IO.File]::WriteAllText($auditConsentStringPath, '{"businessName":"Smoke Test Bistro","websiteOrInstagram":"https://example.com","city":"Lagos","businessType":"Restaurant","email":"owner@example.com","consent":"true","hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
-[System.IO.File]::WriteAllText($quoteConsentMissingPath, '{"businessType":"Restaurant","helpNeeded":"AI Visibility Optimization","mainChallenge":"Smoke test","contactName":"Smoke Test Owner","businessName":"Smoke Test Bistro","email":"owner@example.com","phoneOrWhatsapp":"","websiteOrInstagram":"https://example.com","countryRegion":"Nigeria","hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
-[System.IO.File]::WriteAllText($quoteConsentFalsePath, '{"businessType":"Restaurant","helpNeeded":"AI Visibility Optimization","mainChallenge":"Smoke test","contactName":"Smoke Test Owner","businessName":"Smoke Test Bistro","email":"owner@example.com","phoneOrWhatsapp":"","websiteOrInstagram":"https://example.com","countryRegion":"Nigeria","consent":false,"hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
-[System.IO.File]::WriteAllText($quoteConsentStringPath, '{"businessType":"Restaurant","helpNeeded":"AI Visibility Optimization","mainChallenge":"Smoke test","contactName":"Smoke Test Owner","businessName":"Smoke Test Bistro","email":"owner@example.com","phoneOrWhatsapp":"","websiteOrInstagram":"https://example.com","countryRegion":"Nigeria","consent":"true","hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
-[System.IO.File]::WriteAllText($auditIgnoredConsentMetadataPath, '{"businessName":"Smoke Test Bistro","websiteOrInstagram":"https://example.com","city":"Lagos","businessType":"Restaurant","email":"owner@example.com","consent":true,"consentAcceptedAt":"2000-01-01T00:00:00.000Z","consentVersion":"client-sent-version","hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
-[System.IO.File]::WriteAllText($quoteIgnoredConsentMetadataPath, '{"businessType":"Restaurant","helpNeeded":"AI Visibility Optimization","mainChallenge":"Smoke test","contactName":"Smoke Test Owner","businessName":"Smoke Test Bistro","email":"owner@example.com","phoneOrWhatsapp":"","websiteOrInstagram":"https://example.com","countryRegion":"Nigeria","consent":true,"consentAcceptedAt":"2000-01-01T00:00:00.000Z","consentVersion":"client-sent-version","hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
+[System.IO.File]::WriteAllText($auditConsentMissingPath, '{"businessName":"Smoke Test Bistro","websiteOrInstagram":"https://example.com","city":"Lagos","businessType":"Restaurant","email":"your-owned-address@example.com","hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
+[System.IO.File]::WriteAllText($auditConsentFalsePath, '{"businessName":"Smoke Test Bistro","websiteOrInstagram":"https://example.com","city":"Lagos","businessType":"Restaurant","email":"your-owned-address@example.com","consent":false,"hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
+[System.IO.File]::WriteAllText($auditConsentStringPath, '{"businessName":"Smoke Test Bistro","websiteOrInstagram":"https://example.com","city":"Lagos","businessType":"Restaurant","email":"your-owned-address@example.com","consent":"true","hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
+[System.IO.File]::WriteAllText($quoteConsentMissingPath, '{"businessType":"Restaurant","helpNeeded":"AI Visibility Optimization","mainChallenge":"Smoke test","contactName":"Smoke Test Owner","businessName":"Smoke Test Bistro","email":"your-owned-address@example.com","phoneOrWhatsapp":"","websiteOrInstagram":"https://example.com","countryRegion":"Nigeria","hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
+[System.IO.File]::WriteAllText($quoteConsentFalsePath, '{"businessType":"Restaurant","helpNeeded":"AI Visibility Optimization","mainChallenge":"Smoke test","contactName":"Smoke Test Owner","businessName":"Smoke Test Bistro","email":"your-owned-address@example.com","phoneOrWhatsapp":"","websiteOrInstagram":"https://example.com","countryRegion":"Nigeria","consent":false,"hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
+[System.IO.File]::WriteAllText($quoteConsentStringPath, '{"businessType":"Restaurant","helpNeeded":"AI Visibility Optimization","mainChallenge":"Smoke test","contactName":"Smoke Test Owner","businessName":"Smoke Test Bistro","email":"your-owned-address@example.com","phoneOrWhatsapp":"","websiteOrInstagram":"https://example.com","countryRegion":"Nigeria","consent":"true","hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
+[System.IO.File]::WriteAllText($auditIgnoredConsentMetadataPath, '{"businessName":"Smoke Test Bistro","websiteOrInstagram":"https://example.com","city":"Lagos","businessType":"Restaurant","email":"your-owned-address@example.com","consent":true,"consentAcceptedAt":"2000-01-01T00:00:00.000Z","consentVersion":"client-sent-version","hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
+[System.IO.File]::WriteAllText($quoteIgnoredConsentMetadataPath, '{"businessType":"Restaurant","helpNeeded":"AI Visibility Optimization","mainChallenge":"Smoke test","contactName":"Smoke Test Owner","businessName":"Smoke Test Bistro","email":"your-owned-address@example.com","phoneOrWhatsapp":"","websiteOrInstagram":"https://example.com","countryRegion":"Nigeria","consent":true,"consentAcceptedAt":"2000-01-01T00:00:00.000Z","consentVersion":"client-sent-version","hp_trap_7q":""}', [System.Text.Encoding]::ASCII)
 [System.IO.File]::WriteAllText($honeypotPayloadPath, '{"hp_trap_7q":"filled"}', [System.Text.Encoding]::ASCII)
 [System.IO.File]::WriteAllText($largePayloadPath, ('x' * 20481), [System.Text.Encoding]::ASCII)
 ```
@@ -168,6 +170,20 @@ then one `429` response with `Retry-After`:
 
 ```powershell
 1..6 | ForEach-Object { curl.exe -sS -o NUL -w '%{http_code}\n' -X POST -H 'Content-Type: application/json' -H 'X-Forwarded-For: 192.0.2.102' --data-binary "@$quotePayloadPath" "$base/api/quote-requests" }
+```
+
+## Confirmation recipient limit
+
+Run this case first with a clean owned address that has no audit or quote
+submissions in the previous 24 hours. The same address is used by both
+payloads: the first two requests are audits and the third is a quote. All
+three responses should be `201`; the inbox should receive two confirmations
+and three owner notifications. The third request is still saved and the owner
+is still notified, but it gets no confirmation.
+
+```powershell
+1..2 | ForEach-Object { curl.exe -sS -o NUL -w '%{http_code}\n' -X POST -H 'Content-Type: application/json' -H 'X-Forwarded-For: 192.0.2.103' --data-binary "@$auditPayloadPath" "$base/api/audit-requests" }
+curl.exe -sS -o NUL -w '%{http_code}\n' -X POST -H 'Content-Type: application/json' -H 'X-Forwarded-For: 192.0.2.103' --data-binary "@$quotePayloadPath" "$base/api/quote-requests"
 ```
 
 Use a different reserved test IP if repeating a six-request test within the
