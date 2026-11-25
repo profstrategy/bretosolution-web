@@ -10,9 +10,17 @@ export type RateLimitResult =
   | { limited: false; ipHash: string }
   | { limited: true; ipHash: string; retryAfterSeconds: number };
 
+export interface RateLimitOptions {
+  /** Maximum hits allowed in the window. Defaults to the form-API limit. */
+  limit?: number;
+  /** Window length in milliseconds. Defaults to one hour. */
+  windowMs?: number;
+}
+
 export async function recordRateLimitHit(
-  request: Request,
-  bucket: string
+  request: { headers: Headers },
+  bucket: string,
+  { limit = REQUEST_LIMIT, windowMs = WINDOW_MS }: RateLimitOptions = {}
 ): Promise<RateLimitResult> {
   const forwardedIp = request.headers
     .get('x-forwarded-for')
@@ -44,18 +52,18 @@ export async function recordRateLimitHit(
       bucket,
       ipHash,
       createdAt: {
-        gte: new Date(now.getTime() - WINDOW_MS),
+        gte: new Date(now.getTime() - windowMs),
       },
     };
     const hitCount = await transaction.rateLimitHit.count({ where });
-    if (hitCount >= REQUEST_LIMIT) {
+    if (hitCount >= limit) {
       const oldestHit = await transaction.rateLimitHit.findFirst({
         where,
         orderBy: { createdAt: 'asc' },
         select: { createdAt: true },
       });
       const retryAt =
-        (oldestHit?.createdAt.getTime() ?? now.getTime()) + WINDOW_MS;
+        (oldestHit?.createdAt.getTime() ?? now.getTime()) + windowMs;
 
       return {
         limited: true as const,
