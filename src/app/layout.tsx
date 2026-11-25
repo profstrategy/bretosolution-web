@@ -8,6 +8,7 @@ import {
 } from 'next/font/google';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
+import { SiteChrome } from '@/components/layout/SiteChrome';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { site } from '@/content/site';
 import { seoContent } from '@/content/seo';
@@ -154,11 +155,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         >
           {site.header.skipToContentLabel}
         </a>
-        <Header />
-        <main id="main" tabIndex={-1} className="outline-none">
+        <SiteChrome header={<Header />} footer={<Footer />}>
           {children}
-        </main>
-        <Footer />
+        </SiteChrome>
       </body>
     </html>
   );

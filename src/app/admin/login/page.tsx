@@ -38,7 +38,11 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
   const callbackUrl = safeCallbackUrl(params.callbackUrl);
 
   return (
-    <div className="flex min-h-[100svh] items-center justify-center bg-[var(--bg)] px-4 pt-[112px] pb-16">
+    <main
+      id="main"
+      tabIndex={-1}
+      className="flex min-h-[100svh] items-center justify-center bg-[var(--bg)] px-4 py-12 outline-none"
+    >
       <div className="w-full max-w-[420px] rounded-[20px] border border-[var(--line)] bg-[var(--panel)] px-5 py-8 shadow-[0_12px_40px_var(--shadow)] sm:px-8">
         <p className="font-[family-name:var(--font-display)] text-[21px] font-semibold tracking-[0.08em] text-[var(--ink)]">
           {site.wordmark}
@@ -49,6 +53,6 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
         </h1>
         <LoginForm initialErrorCode={errorCode} callbackUrl={callbackUrl} />
       </div>
-    </div>
+    </main>
   );
 }
