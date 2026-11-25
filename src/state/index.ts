@@ -42,6 +42,7 @@ export type {
   AdminEmailDTO,
   AdminEmailKind,
   AdminEmailRowDTO,
+  AdminEmailSourceDTO,
   AdminEmailStatus,
   DomainSelector,
   DomainState,

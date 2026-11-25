@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint --config node_modules/eslint-config-next/dist/core-web-vitals.js --rule \"react-hooks/set-state-in-effect: off\" src",
-    "test": "node --test \"src/state/__tests__/*.test.ts\"",
+    "test": "node --test \"src/state/__tests__/*.test.ts\" \"src/lib/server/__tests__/*.test.ts\"",
     "admin:hash": "tsx scripts/hash-admin-password.ts",
     "postinstall": "prisma generate"
   },
@@ -17,6 +17,7 @@
     "@prisma/client": "6.19.3",
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.3.1",
+    "@supabase/supabase-js": "^2.119.2",
     "autoprefixer": "^10.4.21",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
@@ -28,6 +29,7 @@
     "react-dom": "^19.2.1",
     "react-hook-form": "^7.92.0",
     "resend": "6.39.0",
+    "sanitize-html": "^2.18.2",
     "tailwind-merge": "^3.3.1",
     "zod": "^4.6.7"
   },
@@ -36,6 +38,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sanitize-html": "^2.16.2",
     "eslint": "9.39.1",
     "eslint-config-next": "^16.4.6",
     "prisma": "6.19.3",

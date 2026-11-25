@@ -56,6 +56,8 @@ function email(id: string, overrides: Partial<AdminEmailDTO> = {}): AdminEmailDT
     calendlyUrl: null,
     rows: [],
     attachment: null,
+    inReplyToMessageId: null,
+    source: null,
     lastEvent: null,
     error: null,
     sentAt: null,
@@ -87,6 +89,7 @@ function inboxMessage(id: string): InboxMessageDTO {
     text: 'Hi',
     attachments: [],
     messageId: `<${id}@example.com>`,
+    hasRemoteImages: false,
   };
 }
 
@@ -601,7 +604,7 @@ describe('async actions', () => {
     const actions = createAsyncActions(
       stubClient({
         listInbox: async (options) =>
-          options?.cursor
+          options?.after
             ? { items: [inboxItem('2')], nextCursor: null }
             : { items: [inboxItem('1')], nextCursor: 'c1' },
         getInboxMessage: async () => message,

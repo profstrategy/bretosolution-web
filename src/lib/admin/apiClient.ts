@@ -14,15 +14,17 @@
  *   DELETE /api/admin/emails/[id]         -> 204, or { ok: true }
  *   POST   /api/admin/emails/[id]/send    -> { email: AdminEmailDTO }
  *   POST   /api/admin/emails/[id]/refresh -> { email: AdminEmailDTO }
- *   POST   /api/admin/emails/preview      -> { html: string; text: string }
- *   POST   /api/admin/attachments/upload-url -> { uploadUrl: string; storagePath: string }
- *   GET    /api/admin/inbox?cursor=       -> { items: InboxItemDTO[]; nextCursor: string | null }
- *   GET    /api/admin/inbox/[id]          -> { message: InboxMessageDTO }
+ *   POST   /api/admin/emails/preview      -> { html: string }
+ *   POST   /api/admin/attachments/upload-url -> { path: string; signedUrl: string; token: string }
+ *   GET    /api/admin/inbox?after=        -> { items: InboxItemDTO[]; nextCursor: string | null; notice?: 'receiving-not-configured' }
+ *   GET    /api/admin/inbox/[id]?images=1 -> { message: InboxMessageDTO }
+ *   GET    /api/admin/inbox/[id]/attachments/[attachmentId] -> file download (use as a link href)
  */
 import type {
   AdminEmailDTO,
   AdminEmailKind,
   AdminEmailRowDTO,
+  AdminEmailSourceDTO,
   AdminEmailStatus,
   InboxAttachmentDTO,
   InboxItemDTO,
@@ -52,6 +54,10 @@ export interface DraftInput {
   calendlyUrl: string | null;
   rows: AdminEmailRowDTO[];
   attachment: DraftAttachmentInput | null;
+  /** RFC Message-ID being replied to (threads the email); optional. */
+  inReplyToMessageId?: string | null;
+  /** Website request this email answers; enables the footer reason line. */
+  source?: AdminEmailSourceDTO | null;
 }
 
 export type DraftPatch = Partial<DraftInput>;
@@ -61,24 +67,39 @@ export interface Page<T> {
   nextCursor: string | null;
 }
 
+export interface InboxPage extends Page<InboxItemDTO> {
+  /** Set when Resend receiving is not available for this account. */
+  notice?: 'receiving-not-configured';
+}
+
 export interface PageOptions {
   cursor?: string | null;
 }
 
+export interface InboxPageOptions {
+  after?: string | null;
+}
+
+export interface InboxMessageOptions {
+  /** Load remote (https) images in the message HTML. */
+  images?: boolean;
+}
+
 export interface EmailPreview {
   html: string;
-  text: string;
 }
 
 export interface UploadUrlRequest {
   filename: string;
-  contentType: string;
+  contentType: 'application/pdf';
   size: number;
 }
 
 export interface UploadUrlResponse {
-  uploadUrl: string;
-  storagePath: string;
+  /** Storage path to save on the draft as `attachment.storagePath`. */
+  path: string;
+  signedUrl: string;
+  token: string;
 }
 
 export interface AdminApiClient {
@@ -91,8 +112,8 @@ export interface AdminApiClient {
   refreshEmail(id: string): Promise<AdminEmailDTO>;
   previewEmail(input: DraftInput): Promise<EmailPreview>;
   createUploadUrl(request: UploadUrlRequest): Promise<UploadUrlResponse>;
-  listInbox(options?: PageOptions): Promise<Page<InboxItemDTO>>;
-  getInboxMessage(id: string): Promise<InboxMessageDTO>;
+  listInbox(options?: InboxPageOptions): Promise<InboxPage>;
+  getInboxMessage(id: string, options?: InboxMessageOptions): Promise<InboxMessageDTO>;
 }
 
 // ---------------------------------------------------------------------------
@@ -207,6 +228,13 @@ function isRow(value: unknown): value is AdminEmailRowDTO {
   return isRecord(value) && isString(value.label) && isString(value.value);
 }
 
+function isSource(value: unknown): value is AdminEmailSourceDTO | null {
+  return (
+    value === null ||
+    (isRecord(value) && (value.type === 'AUDIT' || value.type === 'QUOTE') && isString(value.id))
+  );
+}
+
 export function isAdminEmailDTO(value: unknown): value is AdminEmailDTO {
   if (!isRecord(value)) return false;
   const attachment = value.attachment;
@@ -224,6 +252,8 @@ export function isAdminEmailDTO(value: unknown): value is AdminEmailDTO {
     value.rows.every(isRow) &&
     (attachment === null ||
       (isRecord(attachment) && isString(attachment.name) && isNumber(attachment.size))) &&
+    isStringOrNull(value.inReplyToMessageId) &&
+    isSource(value.source) &&
     isStringOrNull(value.lastEvent) &&
     isStringOrNull(value.error) &&
     isStringOrNull(value.sentAt) &&
@@ -266,7 +296,8 @@ export function isInboxMessageDTO(value: unknown): value is InboxMessageDTO {
     isStringOrNull(value.text) &&
     Array.isArray(value.attachments) &&
     value.attachments.every(isInboxAttachmentDTO) &&
-    isString(value.messageId)
+    isString(value.messageId) &&
+    typeof value.hasRemoteImages === 'boolean'
   );
 }
 
@@ -289,13 +320,11 @@ const parseMessageEnvelope: Parser<InboxMessageDTO> = (data) =>
   isRecord(data) && isInboxMessageDTO(data.message) ? data.message : null;
 
 const parsePreview: Parser<EmailPreview> = (data) =>
-  isRecord(data) && isString(data.html) && isString(data.text)
-    ? { html: data.html, text: data.text }
-    : null;
+  isRecord(data) && isString(data.html) ? { html: data.html } : null;
 
 const parseUploadUrl: Parser<UploadUrlResponse> = (data) =>
-  isRecord(data) && isString(data.uploadUrl) && isString(data.storagePath)
-    ? { uploadUrl: data.uploadUrl, storagePath: data.storagePath }
+  isRecord(data) && isString(data.path) && isString(data.signedUrl) && isString(data.token)
+    ? { path: data.path, signedUrl: data.signedUrl, token: data.token }
     : null;
 
 const parseDeleted: Parser<true> = (data) =>
@@ -369,7 +398,23 @@ function emailPath(id: string, suffix = ''): string {
 }
 
 const parseEmailPage = pageParser(isAdminEmailDTO);
-const parseInboxPage = pageParser(isInboxItemDTO);
+const parseInboxItems = pageParser(isInboxItemDTO);
+const parseInboxPage: Parser<InboxPage> = (data) => {
+  const page = parseInboxItems(data);
+  if (page === null || !isRecord(data)) return null;
+  return data.notice === 'receiving-not-configured'
+    ? { ...page, notice: 'receiving-not-configured' }
+    : page;
+};
+
+function withQuery(path: string, params: Record<string, string | null | undefined>): string {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value) query.set(key, value);
+  }
+  const text = query.toString();
+  return text ? `${path}?${text}` : path;
+}
 
 export const adminApiClient: AdminApiClient = {
   listEmails: (options) =>
@@ -390,11 +435,18 @@ export const adminApiClient: AdminApiClient = {
   createUploadUrl: (uploadRequest) =>
     request('POST', '/api/admin/attachments/upload-url', parseUploadUrl, uploadRequest),
   listInbox: (options) =>
-    request('GET', withCursor('/api/admin/inbox', options), parseInboxPage),
-  getInboxMessage: (id) =>
+    request('GET', withQuery('/api/admin/inbox', { after: options?.after }), parseInboxPage),
+  getInboxMessage: (id, options) =>
     request(
       'GET',
-      `/api/admin/inbox/${encodeURIComponent(id)}`,
+      withQuery(`/api/admin/inbox/${encodeURIComponent(id)}`, {
+        images: options?.images ? '1' : null,
+      }),
       parseMessageEnvelope
     ),
 };
+
+/** Download URL for a received attachment (protected by the admin session). */
+export function inboxAttachmentUrl(emailId: string, attachmentId: string): string {
+  return `/api/admin/inbox/${encodeURIComponent(emailId)}/attachments/${encodeURIComponent(attachmentId)}`;
+}

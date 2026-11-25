@@ -48,7 +48,10 @@ export function hasFilledHoneypot(value: unknown): boolean {
   return typeof honeypot === 'string' && honeypot.trim().length > 0;
 }
 
-export async function readJsonBody(request: Request): Promise<JsonBodyResult> {
+export async function readJsonBody(
+  request: Request,
+  maxBytes: number = MAX_JSON_BODY_BYTES
+): Promise<JsonBodyResult> {
   const contentType = request.headers
     .get('content-type')
     ?.split(';', 1)[0]
@@ -67,7 +70,7 @@ export async function readJsonBody(request: Request): Promise<JsonBodyResult> {
   }
 
   const contentLength = Number(request.headers.get('content-length'));
-  if (Number.isFinite(contentLength) && contentLength > MAX_JSON_BODY_BYTES) {
+  if (Number.isFinite(contentLength) && contentLength > maxBytes) {
     return {
       ok: false,
       response: jsonError('Request body is too large.', 413),
@@ -91,7 +94,7 @@ export async function readJsonBody(request: Request): Promise<JsonBodyResult> {
       if (done) break;
 
       size += value.byteLength;
-      if (size > MAX_JSON_BODY_BYTES) {
+      if (size > maxBytes) {
         await reader.cancel();
         return {
           ok: false,

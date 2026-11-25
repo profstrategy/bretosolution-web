@@ -29,6 +29,11 @@ export interface AdminEmailAttachmentDTO {
   size: number;
 }
 
+export interface AdminEmailSourceDTO {
+  type: 'AUDIT' | 'QUOTE';
+  id: string;
+}
+
 export interface AdminEmailDTO {
   id: string;
   kind: AdminEmailKind;
@@ -41,6 +46,10 @@ export interface AdminEmailDTO {
   calendlyUrl: string | null;
   rows: AdminEmailRowDTO[];
   attachment: AdminEmailAttachmentDTO | null;
+  /** RFC Message-ID this email replies to (threads it in the recipient's client). */
+  inReplyToMessageId: string | null;
+  /** The website request this email answers; drives the footer reason line. */
+  source: AdminEmailSourceDTO | null;
   /** Latest Resend delivery event, e.g. "delivered"; null before sending. */
   lastEvent: string | null;
   /** Safe, server-written failure message; never raw provider text. */
@@ -76,6 +85,8 @@ export interface InboxMessageDTO {
   text: string | null;
   attachments: InboxAttachmentDTO[];
   messageId: string;
+  /** true when remote images were present (removed unless requested). */
+  hasRemoteImages: boolean;
 }
 
 // ---------------------------------------------------------------------------

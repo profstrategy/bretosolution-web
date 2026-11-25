@@ -311,7 +311,7 @@ export function createAsyncActions(client: AdminApiClient): AsyncActions {
         requestKeys.inboxListMore,
         asyncActionCopy.loadMoreInbox,
         async () => {
-          const page = await client.listInbox({ cursor });
+          const page = await client.listInbox({ after: cursor });
           dispatch(inboxLoaded(page.items, page.nextCursor, true));
         }
       );
