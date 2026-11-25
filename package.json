@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint --config node_modules/eslint-config-next/dist/core-web-vitals.js --rule \"react-hooks/set-state-in-effect: off\" src",
+    "test": "node --test \"src/state/__tests__/*.test.ts\"",
     "postinstall": "prisma generate"
   },
   "dependencies": {
