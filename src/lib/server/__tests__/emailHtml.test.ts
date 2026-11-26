@@ -10,6 +10,8 @@ import {
 import {
   createDraftSchema,
   draftRuleErrors,
+  previewDraftSchema,
+  SAFE_LINK_PATTERN,
   sendRuleErrors,
   uploadUrlRequestSchema,
   type NormalisedDraft,
@@ -177,5 +179,23 @@ describe('admin email schema rules', () => {
     assert.equal(uploadUrlRequestSchema.safeParse({ ...valid, size: 0 }).success, false);
     assert.equal(uploadUrlRequestSchema.safeParse({ ...valid, filename: 'a.exe' }).success, false);
     assert.equal(uploadUrlRequestSchema.safeParse({ ...valid, contentType: 'text/html' }).success, false);
+  });
+});
+
+describe('composer schema rules (Stage 5)', () => {
+  test('preview accepts a saved attachment without a path; create still requires it', () => {
+    const attachment = { name: 'audit.pdf', size: 1000 };
+    assert.equal(previewDraftSchema.safeParse({ kind: 'AUDIT', attachment }).success, true);
+    assert.equal(createDraftSchema.safeParse({ kind: 'AUDIT', toEmail: 'a@example.com', attachment }).success, false);
+    const badPath = previewDraftSchema.safeParse({ kind: 'AUDIT', attachment: { ...attachment, storagePath: '../secret.pdf' } });
+    assert.equal(badPath.success, false);
+  });
+
+  test('editor links: https and mailto only', () => {
+    assert.ok(SAFE_LINK_PATTERN.test('https://bretosolution.com/audit'));
+    assert.ok(SAFE_LINK_PATTERN.test('mailto:hello@bretosolution.com'));
+    for (const bad of ['http://example.com', 'javascript:alert(1)', 'https://a b', '/relative', 'data:text/html,x']) {
+      assert.equal(SAFE_LINK_PATTERN.test(bad), false, bad);
+    }
   });
 });

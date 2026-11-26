@@ -36,7 +36,10 @@ export async function POST(request: Request): Promise<Response> {
     bodyHtml: input.bodyHtml ?? '',
     calendlyUrl: input.calendlyUrl ?? null,
     rows: input.rows ?? [],
-    attachment: input.attachment ?? null,
+    // Rendering uses only the name and size; the path is never read here.
+    attachment: input.attachment
+      ? { name: input.attachment.name, size: input.attachment.size, storagePath: input.attachment.storagePath ?? '' }
+      : null,
     inReplyToMessageId: input.inReplyToMessageId ?? null,
     source: input.source ?? null,
   };

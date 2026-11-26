@@ -19,6 +19,9 @@ export const MAX_SUBJECT = 200;
 export const ATTACHMENT_PATH_PATTERN =
   /^admin-emails\/[a-f0-9]{32}\/[A-Za-z0-9][A-Za-z0-9._-]{0,99}\.pdf$/;
 
+/** Links allowed in composed emails (server sanitiser and the editor): https and mailto only. */
+export const SAFE_LINK_PATTERN = /^(https:\/\/[^\s]+|mailto:[^\s]+)$/i;
+
 /** Prisma cuid ids. */
 export const ADMIN_EMAIL_ID_PATTERN = /^[a-z0-9]{20,40}$/i;
 /** Resend ids (UUIDs) and similar opaque ids. */
@@ -88,9 +91,20 @@ const draftFields = {
 export const createDraftSchema = z.object(draftFields).strict();
 /** PATCH /api/admin/emails/[id] (any subset of fields) */
 export const patchDraftSchema = z.object(draftFields).partial().strict();
-/** POST /api/admin/emails/preview (recipient optional) */
+/**
+ * POST /api/admin/emails/preview (recipient optional). The attachment may
+ * omit its storage path: an edited draft's saved PDF has no path on the
+ * client, and the preview only shows the file's name and size.
+ */
 export const previewDraftSchema = z
-  .object({ ...draftFields, toEmail: draftFields.toEmail.optional() })
+  .object({
+    ...draftFields,
+    toEmail: draftFields.toEmail.optional(),
+    attachment: attachmentInputSchema
+      .extend({ storagePath: attachmentInputSchema.shape.storagePath.optional() })
+      .nullable()
+      .optional(),
+  })
   .strict();
 
 export type CreateDraftInput = z.infer<typeof createDraftSchema>;

@@ -85,10 +85,11 @@ export function useDomainDispatch(): DomainDispatch {
   return useDomainStore().dispatch;
 }
 
+/** Each bound action returns what its thunk returns (a result, or null on failure). */
 export type BoundAsyncActions = {
   [K in keyof AsyncActions]: (
     ...args: Parameters<AsyncActions[K]>
-  ) => Promise<void>;
+  ) => ReturnType<ReturnType<AsyncActions[K]>>;
 };
 
 const asyncActions: AsyncActions = createAsyncActions(adminApiClient);
@@ -98,11 +99,13 @@ function bindAsyncActions(dispatch: DomainDispatch): BoundAsyncActions {
   return {
     loadEmails: () => dispatch(asyncActions.loadEmails()),
     loadMoreEmails: () => dispatch(asyncActions.loadMoreEmails()),
-    saveDraft: (input) => dispatch(asyncActions.saveDraft(input)),
-    updateDraft: (id, patch) => dispatch(asyncActions.updateDraft(id, patch)),
+    saveDraft: (input, options) => dispatch(asyncActions.saveDraft(input, options)),
+    updateDraft: (id, patch, options) => dispatch(asyncActions.updateDraft(id, patch, options)),
     deleteDraft: (id) => dispatch(asyncActions.deleteDraft(id)),
     sendEmail: (id) => dispatch(asyncActions.sendEmail(id)),
     refreshEmailStatus: (id) => dispatch(asyncActions.refreshEmailStatus(id)),
+    previewEmail: (input) => dispatch(asyncActions.previewEmail(input)),
+    uploadAttachment: (file, options) => dispatch(asyncActions.uploadAttachment(file, options)),
     loadInbox: () => dispatch(asyncActions.loadInbox()),
     loadMoreInbox: () => dispatch(asyncActions.loadMoreInbox()),
     loadInboxMessage: (id) => dispatch(asyncActions.loadInboxMessage(id)),

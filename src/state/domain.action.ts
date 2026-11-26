@@ -16,8 +16,10 @@ import type {
 } from './domain.state';
 import type {
   AdminApiClient,
+  DraftAttachmentInput,
   DraftInput,
   DraftPatch,
+  PreviewInput,
 } from '@/lib/admin/apiClient';
 
 // ---------------------------------------------------------------------------
@@ -148,6 +150,8 @@ export const requestKeys = {
   emailDelete: (id: string) => `emails/delete:${id}`,
   emailSend: (id: string) => `emails/send:${id}`,
   emailRefresh: (id: string) => `emails/refresh:${id}`,
+  emailPreview: 'emails/preview',
+  attachmentUpload: 'attachments/upload',
   inboxList: 'inbox/list',
   inboxListMore: 'inbox/listMore',
   inboxMessage: (id: string) => `inbox/message:${id}`,
@@ -162,31 +166,63 @@ export const asyncActionCopy = {
   loadEmails: { success: 'Emails loaded.', error: "Couldn't load emails." },
   loadMoreEmails: { success: 'More emails loaded.', error: "Couldn't load more emails." },
   saveDraft: { success: 'Draft saved.', error: "Couldn't save the draft." },
-  updateDraft: { success: 'Draft updated.', error: "Couldn't update the draft." },
+  updateDraft: { success: 'Draft saved.', error: "Couldn't save the draft." },
   deleteDraft: { success: 'Draft deleted.', error: "Couldn't delete the draft." },
-  sendEmail: { success: 'Email is on its way.', error: "Couldn't send the email." },
+  sendEmail: {
+    success: (toEmail: string) => `Email sent to ${toEmail}.`,
+    error: "Couldn't send the email.",
+  },
   refreshEmailStatus: { success: 'Status updated.', error: "Couldn't refresh the status." },
+  previewEmail: { success: null, error: "Couldn't build the preview." },
+  uploadAttachment: { success: null, error: "Couldn't upload the PDF." },
   loadInbox: { success: 'Inbox loaded.', error: "Couldn't load the inbox." },
   loadMoreInbox: { success: 'More messages loaded.', error: "Couldn't load more messages." },
   loadInboxMessage: { success: 'Message loaded.', error: "Couldn't open the message." },
 } as const;
 
-interface ActionCopy {
-  success: string;
+interface ActionCopy<T> {
+  /** Success toast; a function receives the result; null shows none. */
+  success: string | ((result: T) => string) | null;
   error: string;
 }
 
+export interface SaveOptions {
+  /** false skips the success toast ("Send now" saves first, then sends). */
+  toast?: boolean;
+}
+
+export interface UploadAttachmentOptions {
+  onProgress?: (fraction: number) => void;
+  /** Aborting (Remove, closing the composer) ends quietly: no error toast. */
+  signal?: AbortSignal;
+}
+
+/** Thunks resolve to their result, or null when the request failed or was skipped. */
 export interface AsyncActions {
   loadEmails(): DomainThunk;
   loadMoreEmails(): DomainThunk;
-  saveDraft(input: DraftInput): DomainThunk;
-  updateDraft(id: string, patch: DraftPatch): DomainThunk;
+  saveDraft(input: DraftInput, options?: SaveOptions): DomainThunk<Promise<AdminEmailDTO | null>>;
+  updateDraft(
+    id: string,
+    patch: DraftPatch,
+    options?: SaveOptions
+  ): DomainThunk<Promise<AdminEmailDTO | null>>;
   deleteDraft(id: string): DomainThunk;
-  sendEmail(id: string): DomainThunk;
+  sendEmail(id: string): DomainThunk<Promise<AdminEmailDTO | null>>;
   refreshEmailStatus(id: string): DomainThunk;
+  previewEmail(input: PreviewInput): DomainThunk<Promise<string | null>>;
+  uploadAttachment(
+    file: File,
+    options?: UploadAttachmentOptions
+  ): DomainThunk<Promise<DraftAttachmentInput | null>>;
   loadInbox(): DomainThunk;
   loadMoreInbox(): DomainThunk;
   loadInboxMessage(id: string): DomainThunk;
+}
+
+function apiErrorField(error: unknown, field: string): unknown {
+  if (!(error instanceof Error) || error.name !== 'AdminApiError') return undefined;
+  return Reflect.get(error, field);
 }
 
 /**
@@ -195,41 +231,64 @@ export interface AsyncActions {
  * plain `Error`s that may carry raw server text, yields null.
  */
 function safeUserMessage(error: unknown): string | null {
-  if (!(error instanceof Error) || error.name !== 'AdminApiError') return null;
-  const candidate: unknown = Reflect.get(error, 'userMessage');
+  const candidate = apiErrorField(error, 'userMessage');
   return typeof candidate === 'string' ? candidate : null;
 }
 
-async function runRequest(
+function isAborted(error: unknown): boolean {
+  return apiErrorField(error, 'code') === 'aborted';
+}
+
+async function runRequest<T>(
   dispatch: DomainDispatch,
   getState: () => DomainState,
   key: string,
-  copy: ActionCopy,
-  work: () => Promise<void>
-): Promise<void> {
+  copy: ActionCopy<T>,
+  work: () => Promise<T>,
+  toast = true
+): Promise<T | null> {
   // Ignore a duplicate trigger (double click) while the same request runs.
-  if (getState().requests[key]?.status === 'pending') return;
+  if (getState().requests[key]?.status === 'pending') return null;
 
   dispatch(requestStarted(key));
+  let result: T;
   try {
-    await work();
+    result = await work();
   } catch (error) {
+    if (isAborted(error)) {
+      // Cancelled by the admin: settle the request without an error toast.
+      dispatch(requestSucceeded(key));
+      return null;
+    }
     const message = safeUserMessage(error) ?? copy.error;
     dispatch(requestFailed(key, message));
     dispatch(pushToast('error', message));
-    return;
+    return null;
   }
   dispatch(requestSucceeded(key));
-  dispatch(pushToast('success', copy.success));
+  const success = typeof copy.success === 'function' ? copy.success(result) : copy.success;
+  if (toast && success !== null) dispatch(pushToast('success', success));
+  return result;
+}
+
+/** Same shape as the client's AdminApiError for a cancelled request. */
+class Cancelled extends Error {
+  readonly code = 'aborted';
+  readonly userMessage = null;
+  constructor() {
+    super('The request was cancelled.');
+    this.name = 'AdminApiError';
+  }
 }
 
 export function createAsyncActions(client: AdminApiClient): AsyncActions {
   return {
-    loadEmails: () => (dispatch, getState) =>
-      runRequest(dispatch, getState, requestKeys.emailsList, asyncActionCopy.loadEmails, async () => {
+    loadEmails: () => async (dispatch, getState) => {
+      await runRequest(dispatch, getState, requestKeys.emailsList, asyncActionCopy.loadEmails, async () => {
         const page = await client.listEmails();
         dispatch(emailsLoaded(page.items, page.nextCursor, false));
-      }),
+      });
+    },
 
     loadMoreEmails: () => async (dispatch, getState) => {
       const cursor = getState().emails.nextCursor;
@@ -246,24 +305,36 @@ export function createAsyncActions(client: AdminApiClient): AsyncActions {
       );
     },
 
-    saveDraft: (input) => (dispatch, getState) =>
-      runRequest(dispatch, getState, requestKeys.emailCreate, asyncActionCopy.saveDraft, async () => {
-        dispatch(emailUpserted(await client.createEmail(input)));
-      }),
+    saveDraft: (input, options) => (dispatch, getState) =>
+      runRequest(
+        dispatch,
+        getState,
+        requestKeys.emailCreate,
+        asyncActionCopy.saveDraft,
+        async () => {
+          const email = await client.createEmail(input);
+          dispatch(emailUpserted(email));
+          return email;
+        },
+        options?.toast ?? true
+      ),
 
-    updateDraft: (id, patch) => (dispatch, getState) =>
+    updateDraft: (id, patch, options) => (dispatch, getState) =>
       runRequest(
         dispatch,
         getState,
         requestKeys.emailUpdate(id),
         asyncActionCopy.updateDraft,
         async () => {
-          dispatch(emailUpserted(await client.updateEmail(id, patch)));
-        }
+          const email = await client.updateEmail(id, patch);
+          dispatch(emailUpserted(email));
+          return email;
+        },
+        options?.toast ?? true
       ),
 
-    deleteDraft: (id) => (dispatch, getState) =>
-      runRequest(
+    deleteDraft: (id) => async (dispatch, getState) => {
+      await runRequest(
         dispatch,
         getState,
         requestKeys.emailDelete(id),
@@ -272,21 +343,38 @@ export function createAsyncActions(client: AdminApiClient): AsyncActions {
           await client.deleteEmail(id);
           dispatch(emailRemoved(id));
         }
-      ),
+      );
+    },
 
     sendEmail: (id) => (dispatch, getState) =>
-      runRequest(
+      runRequest<AdminEmailDTO>(
         dispatch,
         getState,
         requestKeys.emailSend(id),
-        asyncActionCopy.sendEmail,
+        {
+          success: (email) => asyncActionCopy.sendEmail.success(email.toEmail),
+          error: asyncActionCopy.sendEmail.error,
+        },
         async () => {
-          dispatch(emailUpserted(await client.sendEmail(id)));
+          try {
+            const email = await client.sendEmail(id);
+            dispatch(emailUpserted(email));
+            return email;
+          } catch (error) {
+            // A failed send is stored as FAILED on the server; reload the row
+            // so the list shows it. If that also fails, keep the old row.
+            try {
+              dispatch(emailUpserted(await client.getEmail(id)));
+            } catch {
+              // ignored: the error toast below already tells the admin
+            }
+            throw error;
+          }
         }
       ),
 
-    refreshEmailStatus: (id) => (dispatch, getState) =>
-      runRequest(
+    refreshEmailStatus: (id) => async (dispatch, getState) => {
+      await runRequest(
         dispatch,
         getState,
         requestKeys.emailRefresh(id),
@@ -294,13 +382,42 @@ export function createAsyncActions(client: AdminApiClient): AsyncActions {
         async () => {
           dispatch(emailUpserted(await client.refreshEmail(id)));
         }
+      );
+    },
+
+    previewEmail: (input) => (dispatch, getState) =>
+      runRequest(dispatch, getState, requestKeys.emailPreview, asyncActionCopy.previewEmail, async () => {
+        const preview = await client.previewEmail(input);
+        return preview.html;
+      }),
+
+    uploadAttachment: (file, options) => (dispatch, getState) =>
+      runRequest(
+        dispatch,
+        getState,
+        requestKeys.attachmentUpload,
+        asyncActionCopy.uploadAttachment,
+        async () => {
+          const target = await client.createUploadUrl({
+            filename: file.name,
+            size: file.size,
+            contentType: 'application/pdf',
+          });
+          if (options?.signal?.aborted) throw new Cancelled();
+          await client.uploadFile(target.signedUrl, file, {
+            onProgress: options?.onProgress,
+            signal: options?.signal,
+          });
+          return { name: file.name, size: file.size, storagePath: target.path };
+        }
       ),
 
-    loadInbox: () => (dispatch, getState) =>
-      runRequest(dispatch, getState, requestKeys.inboxList, asyncActionCopy.loadInbox, async () => {
+    loadInbox: () => async (dispatch, getState) => {
+      await runRequest(dispatch, getState, requestKeys.inboxList, asyncActionCopy.loadInbox, async () => {
         const page = await client.listInbox();
         dispatch(inboxLoaded(page.items, page.nextCursor, false));
-      }),
+      });
+    },
 
     loadMoreInbox: () => async (dispatch, getState) => {
       const cursor = getState().inbox.nextCursor;
@@ -317,8 +434,8 @@ export function createAsyncActions(client: AdminApiClient): AsyncActions {
       );
     },
 
-    loadInboxMessage: (id) => (dispatch, getState) =>
-      runRequest(
+    loadInboxMessage: (id) => async (dispatch, getState) => {
+      await runRequest(
         dispatch,
         getState,
         requestKeys.inboxMessage(id),
@@ -326,6 +443,7 @@ export function createAsyncActions(client: AdminApiClient): AsyncActions {
         async () => {
           dispatch(inboxMessageLoaded(await client.getInboxMessage(id)));
         }
-      ),
+      );
+    },
   };
 }

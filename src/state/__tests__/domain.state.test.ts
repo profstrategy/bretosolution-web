@@ -466,6 +466,7 @@ function stubClient(overrides: Partial<AdminApiClient>): AdminApiClient {
     refreshEmail: notImplemented,
     previewEmail: notImplemented,
     createUploadUrl: notImplemented,
+    uploadFile: notImplemented,
     listInbox: notImplemented,
     getInboxMessage: notImplemented,
     ...overrides,
@@ -640,5 +641,98 @@ describe('async actions', () => {
     await first;
     assert.equal(calls, 1);
     assert.equal(store.getState().emails.byId.e1?.status, 'SENDING');
+  });
+});
+
+describe('composer actions (Stage 5)', () => {
+  beforeEach(() => mock.timers.enable({ apis: ['setTimeout'] }));
+  afterEach(() => mock.timers.reset());
+
+  const draftInput = {
+    kind: 'GENERAL' as const,
+    toEmail: 'x@example.com',
+    recipientName: '',
+    businessName: '',
+    subject: 'S',
+    bodyHtml: '<p>B</p>',
+    calendlyUrl: null,
+    rows: [],
+    attachment: null,
+  };
+
+  test('saveDraft resolves to the saved email; toast false skips the toast', async () => {
+    const created = email('d1');
+    const actions = createAsyncActions(stubClient({ createEmail: async () => created }));
+    const store = createDomainStore();
+    const result = await store.dispatch(actions.saveDraft(draftInput, { toast: false }));
+    assert.equal(result, created);
+    assert.deepEqual(store.getState().emails.order, ['d1']);
+    assert.deepEqual(store.getState().toasts.items, []);
+  });
+
+  test('sendEmail names the recipient in the success toast', async () => {
+    const sent = email('e1', { status: 'SENT', toEmail: 'amina@example.com' });
+    const actions = createAsyncActions(stubClient({ sendEmail: async () => sent }));
+    const store = createDomainStore();
+    const result = await store.dispatch(actions.sendEmail('e1'));
+    assert.equal(result, sent);
+    assert.equal(store.getState().toasts.items[0]?.message, 'Email sent to amina@example.com.');
+  });
+
+  test('a failed send reloads the row (FAILED) and resolves to null', async () => {
+    const failed = email('e1', { status: 'FAILED', error: 'Safe message.' });
+    const actions = createAsyncActions(
+      stubClient({
+        sendEmail: async () => {
+          throw new FakeApiError(null);
+        },
+        getEmail: async () => failed,
+      })
+    );
+    const store = createDomainStore();
+    const result = await store.dispatch(actions.sendEmail('e1'));
+    assert.equal(result, null);
+    assert.equal(store.getState().emails.byId.e1, failed);
+    assert.equal(store.getState().toasts.items[0]?.message, asyncActionCopy.sendEmail.error);
+  });
+
+  test('uploadAttachment returns the storage path and reports progress', async () => {
+    const progress: number[] = [];
+    const actions = createAsyncActions(
+      stubClient({
+        createUploadUrl: async () => ({ path: 'admin-emails/p/a.pdf', signedUrl: 'https://s/x', token: 't' }),
+        uploadFile: async (_url, _file, options) => {
+          options?.onProgress?.(0.5);
+          options?.onProgress?.(1);
+        },
+      })
+    );
+    const store = createDomainStore();
+    const file = new File(['%PDF-1.4'], 'a.pdf', { type: 'application/pdf' });
+    const result = await store.dispatch(
+      actions.uploadAttachment(file, { onProgress: (value) => progress.push(value) })
+    );
+    assert.deepEqual(result, { name: 'a.pdf', size: file.size, storagePath: 'admin-emails/p/a.pdf' });
+    assert.deepEqual(progress, [0.5, 1]);
+    assert.deepEqual(store.getState().toasts.items, []);
+  });
+
+  test('an aborted upload resolves to null without an error toast', async () => {
+    const actions = createAsyncActions(
+      stubClient({
+        createUploadUrl: async () => ({ path: 'p', signedUrl: 'https://s/x', token: 't' }),
+        uploadFile: async () => {
+          const error = new FakeApiError(null);
+          Reflect.set(error, 'code', 'aborted');
+          throw error;
+        },
+      })
+    );
+    const store = createDomainStore();
+    const file = new File(['x'], 'a.pdf', { type: 'application/pdf' });
+    const result = await store.dispatch(actions.uploadAttachment(file));
+    assert.equal(result, null);
+    assert.deepEqual(store.getState().toasts.items, []);
+    assert.equal(store.getState().requests[requestKeys.attachmentUpload]?.status, 'success');
   });
 });

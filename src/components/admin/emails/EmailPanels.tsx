@@ -2,9 +2,10 @@
 
 import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { Inbox, Send } from 'lucide-react';
+import { Inbox, Pencil, Send } from 'lucide-react';
 import { adminEmailsCopy } from '@/content/admin';
 import {
+  type AdminEmailDTO,
   requestKeys,
   selectEmailById,
   selectEmailIds,
@@ -14,6 +15,7 @@ import {
   useDomainSelector,
 } from '@/state';
 import { SendMailButton } from '@/components/admin/emails/SendMailButton';
+import { resolveSubject } from '@/lib/admin/emailFormat';
 
 const cardClass = 'rounded-[16px] border border-[var(--line)] bg-[var(--panel)]';
 
@@ -70,9 +72,9 @@ function formatDate(iso: string | null): string {
   return Number.isNaN(date.getTime()) ? '' : date.toISOString().slice(0, 10);
 }
 
-function Row({ title, meta, date }: { title: string; meta: string; date: string }) {
+function RowContent({ title, meta, date }: { title: string; meta: string; date: string }) {
   return (
-    <li className="flex items-center gap-4 px-5 py-4">
+    <>
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate font-[family-name:var(--font-sans)] text-[15px] font-semibold text-[var(--ink)]">
           {title}
@@ -84,20 +86,67 @@ function Row({ title, meta, date }: { title: string; meta: string; date: string 
       <span className="shrink-0 font-[family-name:var(--font-mono)] text-[12px] text-[var(--muted)]">
         {date}
       </span>
+    </>
+  );
+}
+
+function Row(props: { title: string; meta: string; date: string }) {
+  return (
+    <li className="flex items-center gap-4 px-5 py-4">
+      <RowContent {...props} />
     </li>
   );
 }
 
-function SentEmailRow({ id }: { id: string }) {
+/** A row that opens the composer (drafts and failed sends can be edited). */
+function EditableRow({
+  title,
+  meta,
+  date,
+  label,
+  onClick,
+}: {
+  title: string;
+  meta: string;
+  date: string;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={label}
+        aria-haspopup="dialog"
+        className="flex w-full cursor-pointer items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-[var(--btn2)] focus-visible:outline-[3px] focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--accent)] motion-reduce:transition-none"
+      >
+        <RowContent title={title} meta={meta} date={date} />
+        <Pencil className="h-[16px] w-[16px] shrink-0 text-[var(--muted)]" aria-hidden="true" />
+      </button>
+    </li>
+  );
+}
+
+function SentEmailRow({ id, onEdit }: { id: string; onEdit: (email: AdminEmailDTO) => void }) {
   const email = useDomainSelector(selectEmailById(id));
   if (!email) return null;
-  return (
-    <Row
-      title={email.subject || adminEmailsCopy.noSubject}
-      meta={`${email.status} · ${email.toEmail}`}
-      date={formatDate(email.sentAt ?? email.updatedAt)}
-    />
-  );
+  // Show the subject as the recipient sees it ({name}/{business} filled in).
+  const title = resolveSubject(email) || adminEmailsCopy.noSubject;
+  const meta = `${email.status} · ${email.toEmail}`;
+  const date = formatDate(email.sentAt ?? email.updatedAt);
+  if (email.status === 'DRAFT' || email.status === 'FAILED') {
+    return (
+      <EditableRow
+        title={title}
+        meta={meta}
+        date={date}
+        label={adminEmailsCopy.editEmailLabel(title, email.toEmail)}
+        onClick={() => onEdit(email)}
+      />
+    );
+  }
+  return <Row title={title} meta={meta} date={date} />;
 }
 
 function InboxRow({ id }: { id: string }) {
@@ -113,7 +162,13 @@ function InboxRow({ id }: { id: string }) {
 }
 
 /** Data loading is wired in Stage 6; until then the store is empty. */
-export function SendingPanel({ onSendMail }: { onSendMail: () => void }) {
+export function SendingPanel({
+  onSendMail,
+  onEditEmail,
+}: {
+  onSendMail: () => void;
+  onEditEmail: (email: AdminEmailDTO) => void;
+}) {
   const request = useDomainSelector(selectRequest(requestKeys.emailsList));
   const ids = useDomainSelector(selectEmailIds);
   const copy = adminEmailsCopy.empty.sending;
@@ -134,7 +189,7 @@ export function SendingPanel({ onSendMail }: { onSendMail: () => void }) {
   return (
     <ul className={`${cardClass} divide-y divide-[var(--line)]`}>
       {ids.map((id) => (
-        <SentEmailRow key={id} id={id} />
+        <SentEmailRow key={id} id={id} onEdit={onEditEmail} />
       ))}
     </ul>
   );

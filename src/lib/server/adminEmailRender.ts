@@ -7,42 +7,13 @@ import {
   type AttachmentInfo,
   type BuiltEmail,
 } from '@/emails/reply/build';
-import { replyCopy } from '@/emails/reply/copy';
+import { formatFileSize, resolveSubject } from '@/lib/admin/emailFormat';
 import { htmlToPlainText, sanitizeComposerHtml, toEmailBodyHtml } from '@/lib/server/emailHtml';
 import type { NormalisedDraft } from '@/schemas/adminEmail';
 
+export { formatFileSize, resolveSubject };
+
 const PREVIEW_ATTACHMENT: AttachmentInfo = { name: 'audit-report.pdf', sizeLabel: 'PDF' };
-
-export function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-const PLACEHOLDER = /\{\s*(name|business)\s*\}/gi;
-
-/**
- * Resolves the subject. `{name}` and `{business}` are replaced with the
- * recipient's details, so one subject pattern can be personalised per
- * client. An empty subject falls back to the template default
- * (AUDIT/QUOTE only; GENERAL requires a subject).
- */
-export function resolveSubject(draft: Pick<NormalisedDraft, 'kind' | 'subject' | 'recipientName' | 'businessName'>): string {
-  const filled = draft.subject
-    .replace(PLACEHOLDER, (_match, key: string) =>
-      key.toLowerCase() === 'name' ? draft.recipientName : draft.businessName
-    )
-    .replace(/\s{2,}/g, ' ')
-    .trim();
-  if (filled) return filled;
-  if (draft.kind === 'AUDIT') {
-    return draft.businessName
-      ? `${replyCopy.audit.defaultSubject} for ${draft.businessName}`
-      : replyCopy.audit.defaultSubject;
-  }
-  if (draft.kind === 'QUOTE') return replyCopy.quote.defaultSubject;
-  return '(no subject)';
-}
 
 /**
  * True only when the draft is linked to a website request (AuditRequest or

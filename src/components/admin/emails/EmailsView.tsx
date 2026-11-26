@@ -1,11 +1,13 @@
 'use client';
 
-import { useCallback, useRef, type KeyboardEvent } from 'react';
+import { useCallback, useRef, useState, type KeyboardEvent } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { adminEmailsCopy } from '@/content/admin';
 import { cn } from '@/lib/utils';
 import { SendMailButton } from '@/components/admin/emails/SendMailButton';
 import { ReceivingPanel, SendingPanel } from '@/components/admin/emails/EmailPanels';
+import { ComposeEmailModal, type ComposeMode } from '@/components/admin/ComposeEmailModal';
+import type { AdminEmailDTO } from '@/state';
 
 export type EmailsTab = 'sending' | 'receiving';
 const TABS: readonly EmailsTab[] = ['sending', 'receiving'];
@@ -13,6 +15,9 @@ const TABS: readonly EmailsTab[] = ['sending', 'receiving'];
 export function parseEmailsTab(value: string | null): EmailsTab {
   return value === 'receiving' ? 'receiving' : 'sending';
 }
+
+/** The header button; focus returns here if the opener is gone (empty state). */
+const SEND_MAIL_BUTTON_ID = 'admin-send-mail';
 
 const tabId = (tab: EmailsTab) => `emails-tab-${tab}`;
 const panelId = (tab: EmailsTab) => `emails-panel-${tab}`;
@@ -51,9 +56,16 @@ export function EmailsView({ inboxAddress }: { inboxAddress: string }) {
     selectTab(next);
   };
 
-  const handleSendMail = () => {
-    // Stage 5 opens the composer modal from here.
-  };
+  // Which composer is open (UI state, not domain state). Changing it is the
+  // only thing that re-renders this view; typing stays inside the modal.
+  const [composer, setComposer] = useState<ComposeMode | null>(null);
+  const handleSendMail = useCallback(() => setComposer({ type: 'new' }), []);
+  const handleEditEmail = useCallback(
+    (email: AdminEmailDTO) => setComposer({ type: 'edit', email }),
+    []
+  );
+  const closeComposer = useCallback(() => setComposer(null), []);
+  const fallbackFocus = useCallback(() => document.getElementById(SEND_MAIL_BUTTON_ID), []);
 
   return (
     <div>
@@ -66,7 +78,11 @@ export function EmailsView({ inboxAddress }: { inboxAddress: string }) {
             {adminEmailsCopy.subtitle(inboxAddress)}
           </p>
         </div>
-        <SendMailButton onClick={handleSendMail} className="w-full shrink-0 sm:w-auto" />
+        <SendMailButton
+          id={SEND_MAIL_BUTTON_ID}
+          onClick={handleSendMail}
+          className="w-full shrink-0 sm:w-auto"
+        />
       </div>
 
       <div
@@ -111,7 +127,9 @@ export function EmailsView({ inboxAddress }: { inboxAddress: string }) {
         tabIndex={0}
         className="mt-6 rounded-[16px] outline-none focus-visible:outline-[3px] focus-visible:outline-[var(--accent)]"
       >
-        {activeTab === 'sending' ? <SendingPanel onSendMail={handleSendMail} /> : null}
+        {activeTab === 'sending' ? (
+          <SendingPanel onSendMail={handleSendMail} onEditEmail={handleEditEmail} />
+        ) : null}
       </div>
       <div
         role="tabpanel"
@@ -123,6 +141,15 @@ export function EmailsView({ inboxAddress }: { inboxAddress: string }) {
       >
         {activeTab === 'receiving' ? <ReceivingPanel inboxAddress={inboxAddress} /> : null}
       </div>
+
+      {composer ? (
+        <ComposeEmailModal
+          key={composer.type === 'edit' ? `edit-${composer.email.id}` : composer.type}
+          mode={composer}
+          onClose={closeComposer}
+          fallbackFocus={fallbackFocus}
+        />
+      ) : null}
     </div>
   );
 }

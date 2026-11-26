@@ -35,6 +35,8 @@ export type {
   DomainDispatch,
   DomainThunk,
   PagePayload,
+  SaveOptions,
+  UploadAttachmentOptions,
 } from './domain.action';
 
 export type {

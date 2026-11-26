@@ -12,6 +12,7 @@
 import sanitizeHtml from 'sanitize-html';
 import { toPlainText } from '@react-email/render';
 import { emailTokens as t } from '../../emails/reply/tokens.ts';
+import { SAFE_LINK_PATTERN as SAFE_LINK } from '../../schemas/adminEmail.ts';
 
 // ---------------------------------------------------------------------------
 // Composer (admin-written) HTML
@@ -21,7 +22,6 @@ export const COMPOSER_ALLOWED_TAGS = [
   'p', 'br', 'strong', 'b', 'em', 'i', 'u', 'a', 'ul', 'ol', 'li', 'h2', 'h3', 'blockquote',
 ] as const;
 
-const SAFE_LINK = /^(https:\/\/[^\s]+|mailto:[^\s]+)$/i;
 
 function linkAttributes(href: string | undefined): sanitizeHtml.Attributes {
   const value = href?.trim() ?? '';

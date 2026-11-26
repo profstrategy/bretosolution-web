@@ -19,6 +19,10 @@
  *   GET    /api/admin/inbox?after=        -> { items: InboxItemDTO[]; nextCursor: string | null; notice?: 'receiving-not-configured' }
  *   GET    /api/admin/inbox/[id]?images=1 -> { message: InboxMessageDTO }
  *   GET    /api/admin/inbox/[id]/attachments/[attachmentId] -> file download (use as a link href)
+ *
+ * `uploadFile` PUTs a PDF straight to the Supabase signed upload URL from
+ * `createUploadUrl` (same request shape as storage-js `uploadToSignedUrl`).
+ * It uses XMLHttpRequest because fetch cannot report upload progress.
  */
 import type {
   AdminEmailDTO,
@@ -62,6 +66,15 @@ export interface DraftInput {
 
 export type DraftPatch = Partial<DraftInput>;
 
+/**
+ * Preview accepts a draft whose recipient is not filled in yet, and an
+ * attachment without a storage path (a PDF already saved on the draft).
+ */
+export type PreviewInput = Omit<DraftInput, 'toEmail' | 'attachment'> & {
+  toEmail?: string;
+  attachment: { name: string; size: number; storagePath?: string } | null;
+};
+
 export interface Page<T> {
   items: T[];
   nextCursor: string | null;
@@ -102,6 +115,13 @@ export interface UploadUrlResponse {
   token: string;
 }
 
+export interface UploadFileOptions {
+  /** Called with 0..1 while the file uploads. */
+  onProgress?: (fraction: number) => void;
+  /** Aborting rejects with an `AdminApiError` whose code is `aborted`. */
+  signal?: AbortSignal;
+}
+
 export interface AdminApiClient {
   listEmails(options?: PageOptions): Promise<Page<AdminEmailDTO>>;
   createEmail(input: DraftInput): Promise<AdminEmailDTO>;
@@ -110,8 +130,9 @@ export interface AdminApiClient {
   deleteEmail(id: string): Promise<void>;
   sendEmail(id: string): Promise<AdminEmailDTO>;
   refreshEmail(id: string): Promise<AdminEmailDTO>;
-  previewEmail(input: DraftInput): Promise<EmailPreview>;
+  previewEmail(input: PreviewInput): Promise<EmailPreview>;
   createUploadUrl(request: UploadUrlRequest): Promise<UploadUrlResponse>;
+  uploadFile(signedUrl: string, file: Blob, options?: UploadFileOptions): Promise<void>;
   listInbox(options?: InboxPageOptions): Promise<InboxPage>;
   getInboxMessage(id: string, options?: InboxMessageOptions): Promise<InboxMessageDTO>;
 }
@@ -131,6 +152,7 @@ export type AdminApiErrorCode =
   | 'server'
   | 'timeout'
   | 'network'
+  | 'aborted'
   | 'bad_response';
 
 const SAFE_MESSAGES: Record<AdminApiErrorCode, string> = {
@@ -144,6 +166,7 @@ const SAFE_MESSAGES: Record<AdminApiErrorCode, string> = {
   server: 'The server could not complete the request.',
   timeout: 'The request timed out. Please try again.',
   network: 'Network problem. Check your connection and try again.',
+  aborted: 'The request was cancelled.',
   bad_response: 'The server sent an unexpected response.',
 };
 
@@ -416,6 +439,55 @@ function withQuery(path: string, params: Record<string, string | null | undefine
   return text ? `${path}?${text}` : path;
 }
 
+/** Upload timeout: generous, a 15 MB PDF on a slow connection. */
+export const UPLOAD_TIMEOUT_MS = 5 * 60_000;
+
+function uploadFile(signedUrl: string, file: Blob, options: UploadFileOptions = {}): Promise<void> {
+  const { onProgress, signal } = options;
+  return new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new AdminApiError('aborted', null));
+      return;
+    }
+    const xhr = new XMLHttpRequest();
+    const onAbort = () => xhr.abort();
+    const cleanup = () => signal?.removeEventListener('abort', onAbort);
+
+    xhr.open('PUT', signedUrl);
+    xhr.timeout = UPLOAD_TIMEOUT_MS;
+    xhr.setRequestHeader('content-type', 'application/pdf');
+    xhr.setRequestHeader('cache-control', 'max-age=3600');
+    xhr.setRequestHeader('x-upsert', 'false');
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && event.total > 0) onProgress?.(event.loaded / event.total);
+    };
+    xhr.onload = () => {
+      cleanup();
+      if (xhr.status >= 200 && xhr.status < 300) {
+        onProgress?.(1);
+        resolve();
+      } else {
+        // Supabase answers 400 for size/MIME rejections as well; never echo its text.
+        reject(new AdminApiError(xhr.status === 413 ? 'too_large' : codeForStatus(xhr.status), xhr.status));
+      }
+    };
+    xhr.onerror = () => {
+      cleanup();
+      reject(new AdminApiError('network', null));
+    };
+    xhr.ontimeout = () => {
+      cleanup();
+      reject(new AdminApiError('timeout', null));
+    };
+    xhr.onabort = () => {
+      cleanup();
+      reject(new AdminApiError('aborted', null));
+    };
+    signal?.addEventListener('abort', onAbort, { once: true });
+    xhr.send(file);
+  });
+}
+
 export const adminApiClient: AdminApiClient = {
   listEmails: (options) =>
     request('GET', withCursor('/api/admin/emails', options), parseEmailPage),
@@ -434,6 +506,7 @@ export const adminApiClient: AdminApiClient = {
     request('POST', '/api/admin/emails/preview', parsePreview, input),
   createUploadUrl: (uploadRequest) =>
     request('POST', '/api/admin/attachments/upload-url', parseUploadUrl, uploadRequest),
+  uploadFile,
   listInbox: (options) =>
     request('GET', withQuery('/api/admin/inbox', { after: options?.after }), parseInboxPage),
   getInboxMessage: (id, options) =>
