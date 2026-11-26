@@ -1,3 +1,4 @@
+import 'server-only';
 import { createHash } from 'node:crypto';
 import { getPrismaClient } from '@/lib/db';
 import { getRateLimitSalt } from '@/lib/server/env';

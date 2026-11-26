@@ -417,7 +417,9 @@ export function RichTextEditor({
   return (
     <div
       className={cn(
-        'rounded-[12px] border bg-[var(--panel)] focus-within:border-[var(--accent)]',
+        // The editable area has no outline of its own (module CSS); show the
+        // same 3px ring as the other fields on the wrapper while it has focus.
+        'rounded-[12px] border bg-[var(--panel)] focus-within:border-[var(--accent)] [&:has([contenteditable]:focus)]:outline-[3px] [&:has([contenteditable]:focus)]:outline-offset-[1px] [&:has([contenteditable]:focus)]:outline-[var(--accent)]',
         invalid ? 'border-[var(--accent)]' : 'border-[var(--line)]'
       )}
     >

@@ -79,9 +79,29 @@ export async function createSignedUploadUrl(path: string): Promise<SignedUpload>
   return { path: data.path, signedUrl: data.signedUrl, token: data.token };
 }
 
-export async function downloadAttachment(path: string): Promise<Buffer> {
-  const { data, error } = await getBucket().download(path);
+/** The stored object is larger than allowed (the upload bypassed the app). */
+export class AttachmentTooLargeError extends Error {
+  constructor() {
+    super('Attachment too large.');
+    this.name = 'AttachmentTooLargeError';
+  }
+}
+
+/**
+ * Downloads an attachment, refusing objects over `maxBytes`. The size is
+ * checked from the object's metadata first, so an oversized upload is not
+ * read into memory. If the metadata cannot be read, the download goes ahead
+ * and its size is checked before the bytes are buffered.
+ */
+export async function downloadAttachment(path: string, maxBytes: number): Promise<Buffer> {
+  const storage = getBucket();
+  const info = await storage.info(path).catch(() => null);
+  if (info && !info.error && typeof info.data.size === 'number' && info.data.size > maxBytes) {
+    throw new AttachmentTooLargeError();
+  }
+  const { data, error } = await storage.download(path);
   if (error || !data) throw new StorageError('download');
+  if (data.size > maxBytes) throw new AttachmentTooLargeError();
   return Buffer.from(await data.arrayBuffer());
 }
 

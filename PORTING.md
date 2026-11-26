@@ -117,6 +117,18 @@ routes.
 - `LEAD_NOTIFY_EMAIL` — Recipient for new audit and quote notifications.
 - `LEAD_FROM_EMAIL` — Verified sender address for those notifications.
 
+The admin dashboard (`/admin`) adds the variables below. Their full
+descriptions, and the Supabase, Google and Resend setup, are in
+[docs/ADMIN.md](docs/ADMIN.md).
+
+- `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH_B64`,
+  `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: admin sign-in.
+- `ADMIN_INBOX_ADDRESS`: the support address shown and read in the admin.
+- `SUPABASE_URL` (or `NEXT_PUBLIC_SUPABASE_URL`) and
+  `SUPABASE_SERVICE_ROLE_KEY`: server-only access to the private PDF bucket.
+- `RESEND_API_KEY` must have full access, because the admin reads delivery
+  status and received mail.
+
 The following Calendly variables remain for the unimplemented integration:
 
 - `NEXT_PUBLIC_CALENDLY_SCHEDULING_URL` — Public scheduling URL; the current
@@ -166,3 +178,24 @@ The following Calendly variables remain for the unimplemented integration:
 - The current document has no numbered sections 5 or 6. Theme migration is
   recorded as completed above; placeholder status is listed under “Still
   open.” No new numbered sections were invented.
+
+## Admin dashboard result
+
+- A private admin area is implemented at `/admin`, with email and password
+  or Google sign-in for one admin. It covers composing, sending and tracking
+  emails through Resend, with PDF attachments in Supabase Storage, and
+  reading received mail. See [docs/ADMIN.md](docs/ADMIN.md) and
+  `STAGE1_NOTES.md` to `STAGE7_NOTES.md`.
+- The public site is unchanged, apart from these additions:
+  - `robots.txt` disallows `/admin`;
+  - `/admin` responses carry `X-Robots-Tag: noindex, nofollow` and
+    `X-Frame-Options: DENY`;
+  - `/api/admin` responses carry `Cache-Control: no-store`;
+  - the shared server modules (`src/lib/server/*`, `src/lib/db.ts`) now
+    import `server-only`, which `next` aliases itself (no package added).
+- `npm test` also runs `scripts/check-admin-guards.ts`, which fails if an
+  admin page or API route does not call the admin guard first.
+- Still open:
+  - create the private Supabase bucket `admin-email-attachments`;
+  - enable Resend receiving (MX) for the support address;
+  - choose a Node.js host near the eu-west-1 database.

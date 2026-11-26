@@ -117,8 +117,11 @@ export function ReceivingPanel({ inboxAddress, onOpen }: { inboxAddress: string;
       <div className="mb-3 flex justify-end">
         <button
           type="button"
-          onClick={() => void actions.loadInbox()}
-          disabled={list.status === 'pending'}
+          // aria-disabled keeps keyboard focus on the button while it works.
+          onClick={() => {
+            if (list.status !== 'pending') void actions.loadInbox();
+          }}
+          aria-disabled={list.status === 'pending' || undefined}
           aria-busy={refreshing || undefined}
           className={smallButtonClass}
         >

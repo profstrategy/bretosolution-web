@@ -14,7 +14,7 @@ import { recordToDraft, toAdminEmailDTO } from '@/lib/server/adminEmailDto';
 import { renderAdminEmail } from '@/lib/server/adminEmailRender';
 import { hasVisibleText } from '@/lib/server/emailHtml';
 import { getAdminSendIdentity, getResendClient, safeSendError } from '@/lib/server/resendClient';
-import { downloadAttachment } from '@/lib/server/storage';
+import { AttachmentTooLargeError, downloadAttachment } from '@/lib/server/storage';
 import { site } from '@/content/site';
 import {
   ADMIN_EMAIL_ID_PATTERN,
@@ -91,8 +91,11 @@ export async function POST(request: Request, context: RouteContext): Promise<Res
     if (draft.attachment) {
       let pdf: Buffer;
       try {
-        pdf = await downloadAttachment(draft.attachment.storagePath);
-      } catch {
+        pdf = await downloadAttachment(draft.attachment.storagePath, MAX_ATTACHMENT_BYTES);
+      } catch (error) {
+        if (error instanceof AttachmentTooLargeError) {
+          throw new SendFailure('The attachment is larger than 15 MB. Upload a smaller PDF.', 'too-large');
+        }
         throw new SendFailure('The attachment could not be found. Upload the PDF again.', 'storage');
       }
       if (pdf.length === 0 || pdf.length > MAX_ATTACHMENT_BYTES || !isPdf(pdf)) {
@@ -147,7 +150,7 @@ export async function POST(request: Request, context: RouteContext): Promise<Res
       .catch((updateError: unknown) => {
         console.error('[admin-api] emails/send: could not mark FAILED.', updateError instanceof Error ? updateError.name : typeof updateError);
       });
-    if (error instanceof SendFailure && (error.code === 'storage' || error.code === 'not-pdf')) {
+    if (error instanceof SendFailure && (error.code === 'storage' || error.code === 'not-pdf' || error.code === 'too-large')) {
       return badRequest({ attachment: error.safeMessage });
     }
     return serverError('emails/send', error, error instanceof SendFailure ? error.code : null);

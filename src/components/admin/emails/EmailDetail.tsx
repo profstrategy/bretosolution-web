@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { adminEmailsCopy } from '@/content/admin';
 import { formatFileSize } from '@/lib/admin/emailFormat';
 import {
@@ -43,6 +43,24 @@ function documentKey(html: string): string {
 }
 
 export function EmailFrame({ title, html, status }: { title: string; html: string | null; status: string | null }) {
+  // Focus inside a frame matches neither :focus nor :focus-within on the
+  // <iframe>, and the element gets no focus event. When focus moves into the
+  // frame, this window blurs and document.activeElement becomes the iframe:
+  // use that to draw the keyboard focus ring.
+  const frameRef = useRef<HTMLIFrameElement | null>(null);
+  const [focused, setFocused] = useState(false);
+  useEffect(() => {
+    const update = () => setFocused(frameRef.current !== null && document.activeElement === frameRef.current);
+    const onWindowBlur = () => window.setTimeout(update, 0);
+    window.addEventListener('blur', onWindowBlur);
+    window.addEventListener('focus', update);
+    document.addEventListener('focusin', update);
+    return () => {
+      window.removeEventListener('blur', onWindowBlur);
+      window.removeEventListener('focus', update);
+      document.removeEventListener('focusin', update);
+    };
+  }, []);
   return (
     <div className="flex min-h-[420px] flex-1 flex-col">
       {html !== null ? (
@@ -54,7 +72,9 @@ export function EmailFrame({ title, html, status }: { title: string; html: strin
           title={title}
           sandbox=""
           srcDoc={html}
-          className="min-h-[420px] w-full flex-1 rounded-[12px] border border-[var(--line)] bg-white"
+          ref={frameRef}
+          data-focused={focused || undefined}
+          className="min-h-[420px] w-full flex-1 rounded-[12px] border border-[var(--line)] bg-white data-[focused]:outline-[3px] data-[focused]:outline-offset-[2px] data-[focused]:outline-[var(--accent)]"
         />
       ) : (
         <p role="status" className="flex min-h-[200px] flex-1 items-center justify-center rounded-[12px] border border-dashed border-[var(--line)] px-4 text-center font-[family-name:var(--font-sans)] text-[14px] text-[var(--muted)]">

@@ -1,3 +1,4 @@
+import 'server-only';
 import { createElement } from 'react';
 import { Resend } from 'resend';
 import type { AuditRequestValues } from '@/schemas/audit';

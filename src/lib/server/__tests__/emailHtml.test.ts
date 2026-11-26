@@ -114,6 +114,20 @@ describe('sanitizeInboundHtml', () => {
     assert.ok(!result.html.includes('x/a.png') && !result.html.includes('x/b.png'));
   });
 
+  test('drops other ways to load content or run script (Stage 7)', () => {
+    const tricky =
+      '<style>body{background:url(https://evil/s.png)}</style><meta http-equiv="refresh" content="0;url=https://evil">' +
+      '<link rel="stylesheet" href="https://evil/x.css"><base href="https://evil/">' +
+      '<svg onload="alert(1)"><image href="https://evil/i.png"/></svg><object data="https://evil/o"></object>' +
+      '<img src="data:image/png;base64,iVBORw0KGgo=" srcset="https://evil/1x.png 1x" onerror="alert(1)">' +
+      '<table background="https://evil/bg.png"><tr><td background="https://evil/td.png">x</td></tr></table>' +
+      '<a href="data:text/html,<script>alert(1)</script>">d</a><a href="vbscript:x">v</a>';
+    const { html } = sanitizeInboundHtml(tricky, { allowRemoteImages: true });
+    for (const banned of ['<style', '<meta', '<link', '<base', '<svg', '<image', '<object', 'srcset', 'onerror', 'onload', 'background=', 'evil', 'data:text', 'vbscript']) {
+      assert.ok(!html.toLowerCase().includes(banned), `should not contain ${banned}`);
+    }
+  });
+
   test('a message without remote images reports false', () => {
     assert.equal(sanitizeInboundHtml('<p>Hi</p>', { allowRemoteImages: false }).hasRemoteImages, false);
   });

@@ -213,6 +213,22 @@ export function ComposeEmailModal({ mode, onClose, fallbackFocus }: ComposeEmail
   }, [discardOpen]);
 
   /**
+   * Disabling the button that started an action (Save draft, Preview, Send)
+   * drops focus to <body>, where Escape and Tab no longer reach the dialog.
+   * When the action ends with the dialog still open, put focus back on that
+   * control, or on the first field if it is gone.
+   */
+  const lastFocusRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (busy !== null) return;
+    const dialog = dialogRef.current;
+    if (!dialog || dialog.contains(document.activeElement)) return;
+    const last = lastFocusRef.current;
+    const target = last && last.isConnected && dialog.contains(last) ? last : fieldRefs.current.toEmail ?? dialog;
+    target.focus();
+  }, [busy]);
+
+  /**
    * Focus to move after the next commit, once the target exists: "restore"
    * returns to where focus was before the discard prompt (or the dialog),
    * "attachment" goes to the PDF field's button.
@@ -525,6 +541,9 @@ export function ComposeEmailModal({ mode, onClose, fallbackFocus }: ComposeEmail
         aria-labelledby={titleId}
         tabIndex={-1}
         onKeyDown={onKeyDown}
+        onFocusCapture={(event) => {
+          lastFocusRef.current = event.target instanceof HTMLElement ? event.target : null;
+        }}
         className="absolute inset-0 flex flex-col outline-none focus-visible:outline-none bg-[var(--panel)] text-[var(--ink)] sm:inset-x-4 sm:bottom-auto sm:top-[4vh] sm:mx-auto sm:max-h-[92vh] sm:max-w-[760px] sm:rounded-[16px] sm:border sm:border-[var(--line)] sm:shadow-[0_24px_64px_var(--shadow)]"
       >
         <header className="flex shrink-0 items-center gap-3 border-b border-[var(--line)] py-2 pl-5 pr-2">

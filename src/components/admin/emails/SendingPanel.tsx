@@ -113,9 +113,12 @@ export function EmailActions({
           type="button"
           className={smallButtonClass}
           aria-label={label(copy.actions.refreshStatus)}
-          disabled={refreshing}
+          // aria-disabled keeps keyboard focus on the button while it works.
+          aria-disabled={refreshing || undefined}
           aria-busy={refreshing || undefined}
-          onClick={() => handlers.refresh(email.id)}
+          onClick={() => {
+            if (!refreshing) handlers.refresh(email.id);
+          }}
         >
           <RefreshCw className={cn('h-[16px] w-[16px]', refreshing && 'motion-safe:animate-spin')} aria-hidden="true" />
           {refreshing ? copy.actions.refreshingStatus : copy.actions.refreshStatus}

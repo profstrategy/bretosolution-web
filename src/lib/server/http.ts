@@ -1,3 +1,4 @@
+import 'server-only';
 import type { ZodError } from 'zod';
 import { HONEYPOT_FIELD } from '@/schemas/honeypot';
 

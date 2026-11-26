@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 export const cardClass = 'rounded-[16px] border border-[var(--line)] bg-[var(--panel)]';
 
 export const smallButtonClass =
-  'inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-1.5 rounded-[10px] border border-[var(--line)] px-3 font-[family-name:var(--font-sans)] text-[14px] font-semibold text-[var(--ink)] transition-colors hover:bg-[var(--btn2)] focus-visible:outline-[3px] focus-visible:outline-offset-[2px] focus-visible:outline-[var(--accent)] disabled:cursor-default disabled:opacity-50 motion-reduce:transition-none';
+  'inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-1.5 rounded-[10px] border border-[var(--line)] px-3 font-[family-name:var(--font-sans)] text-[14px] font-semibold text-[var(--ink)] transition-colors hover:bg-[var(--btn2)] focus-visible:outline-[3px] focus-visible:outline-offset-[2px] focus-visible:outline-[var(--accent)] disabled:cursor-default disabled:opacity-50 aria-disabled:cursor-default aria-disabled:opacity-50 motion-reduce:transition-none';
 
 export function EmptyState({
   icon: Icon,
@@ -95,7 +95,8 @@ export function ListError({ message, onRetry, compact = false }: { message: stri
 export function LoadMoreButton({ onClick, pending }: { onClick: () => void; pending: boolean }) {
   return (
     <div className="mt-4 flex justify-center">
-      <button type="button" onClick={onClick} disabled={pending} aria-busy={pending || undefined} className={cn(smallButtonClass, 'min-w-[140px]')}>
+      {/* aria-disabled, not disabled: a disabled button drops keyboard focus to <body>. */}
+      <button type="button" onClick={() => { if (!pending) onClick(); }} aria-disabled={pending || undefined} aria-busy={pending || undefined} className={cn(smallButtonClass, 'min-w-[140px]')}>
         {pending ? adminEmailsCopy.loadingMore : adminEmailsCopy.loadMore}
       </button>
     </div>
