@@ -180,6 +180,17 @@ export function ReplyLayout({
                             {replyCopy.common.unsubscribeLabel}
                           </a>
                         </p>
+                        <p style={{ ...small, marginTop: 6 }}>
+                          {replyCopy.common.contact.websiteLabel}:{' '}
+                          <a href={replyCopy.common.websiteUrl} style={{ color: t.muted }}>
+                            {replyCopy.common.websiteLabel}
+                          </a>
+                          {' · '}
+                          {replyCopy.common.contact.whatsappLabel}:{' '}
+                          <a href={replyCopy.common.contact.whatsappUrl} style={{ color: t.muted }}>
+                            {replyCopy.common.contact.whatsapp}
+                          </a>
+                        </p>
                         <p style={{ ...small, marginTop: 12 }}>
                           {brand.name}
                           {brand.addressLines.map((line, i) => (

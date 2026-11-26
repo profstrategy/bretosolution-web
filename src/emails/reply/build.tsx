@@ -69,6 +69,8 @@ function footerText(reason: string | undefined): string[] {
     '--',
     ...(reason ? [reason] : []),
     `Questions? Reply to this email or write to ${brand.contactEmail}.`,
+    `${replyCopy.common.contact.websiteLabel}: ${replyCopy.common.websiteUrl}`,
+    `${replyCopy.common.contact.whatsappLabel}: ${replyCopy.common.contact.whatsapp} (${replyCopy.common.contact.whatsappUrl})`,
     `Unsubscribe: ${replyCopy.common.unsubscribeHref}`,
     '',
     brand.name,

@@ -4,6 +4,9 @@
 // `footerReason` is shown ONLY when the email is linked to a website request
 // (AuditRequest or QuoteRequest) whose email matches the recipient. A newly
 // created or cold email never shows it. See src/lib/server/adminEmailRender.ts.
+import { site } from '@/content/site';
+import { seoContent } from '@/content/seo';
+
 export const replyCopy = {
   audit: {
     eyebrow: 'Free AI Visibility Audit',
@@ -47,5 +50,15 @@ export const replyCopy = {
     unsubscribeLabel: 'Unsubscribe',
     unsubscribeHref:
       'mailto:hello@bretosolution.com?subject=Unsubscribe&body=Please%20stop%20emailing%20me.',
+    // Shown in every reply footer. Values come from src/content (site + seo).
+    websiteUrl: seoContent.siteUrl,
+    websiteLabel: site.domain,
+    contact: {
+      email: site.contact.email,
+      whatsapp: site.contact.whatsapp,
+      whatsappUrl: site.contact.whatsappUrl,
+      whatsappLabel: 'WhatsApp',
+      websiteLabel: 'Website',
+    },
   },
 } as const;

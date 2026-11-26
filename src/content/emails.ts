@@ -33,6 +33,11 @@ export const emailFooterCopy = {
   unsubscribeSubject: 'Unsubscribe',
   unsubscribeBody: 'Please stop emailing me.',
   postalAddress: site.postalAddress,
+  websiteLabel: 'Website',
+  websiteText: site.domain,
+  whatsappLabel: 'WhatsApp',
+  whatsapp: site.contact.whatsapp,
+  whatsappUrl: site.contact.whatsappUrl,
 } as const;
 
 export function getUnsubscribeUrl(): string {
