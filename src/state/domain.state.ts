@@ -102,8 +102,12 @@ export interface NormalizedList<T> {
 
 export type EmailsState = NormalizedList<AdminEmailDTO>;
 
+/** Set when the API reports that Resend receiving is not available. */
+export type InboxNotice = 'receiving-not-configured';
+
 export interface InboxState extends NormalizedList<InboxItemDTO> {
   messageById: Record<string, InboxMessageDTO>;
+  notice: InboxNotice | null;
 }
 
 export type RequestStatus = 'idle' | 'pending' | 'success' | 'error';
@@ -287,17 +291,22 @@ export function emailsReducer(
 export const initialInboxState: InboxState = {
   ...createList<InboxItemDTO>(),
   messageById: {},
+  notice: null,
 };
 
 export function inboxReducer(state: InboxState, action: DomainAction): InboxState {
   switch (action.type) {
-    case 'inbox/loaded':
-      return applyPage(
+    case 'inbox/loaded': {
+      const next = applyPage(
         state,
         action.payload.items,
         action.payload.nextCursor,
         action.payload.append
       );
+      // A first page sets (or clears) the notice; "load more" keeps it.
+      const notice = action.payload.append ? state.notice : (action.payload.notice ?? null);
+      return notice === next.notice ? next : { ...next, notice };
+    }
     case 'inbox/messageLoaded': {
       const { message } = action.payload;
       if (state.messageById[message.id] === message) return state;
@@ -405,6 +414,26 @@ function memoByKey<T>(
 
 export const selectEmailIds: DomainSelector<string[]> = (state) =>
   state.emails.order;
+
+export const selectEmailsLoaded: DomainSelector<boolean> = (state) => state.emails.loaded;
+export const selectEmailsNextCursor: DomainSelector<string | null> = (state) =>
+  state.emails.nextCursor;
+
+export const selectInboxLoaded: DomainSelector<boolean> = (state) => state.inbox.loaded;
+export const selectInboxNextCursor: DomainSelector<string | null> = (state) =>
+  state.inbox.nextCursor;
+export const selectInboxNotice: DomainSelector<InboxNotice | null> = (state) =>
+  state.inbox.notice;
+
+/** "12", or "20+" when more pages exist; null before the first load. */
+function countLabel(list: NormalizedList<unknown>): string | null {
+  if (!list.loaded) return null;
+  return `${list.order.length}${list.nextCursor ? '+' : ''}`;
+}
+export const selectEmailCountLabel: DomainSelector<string | null> = (state) =>
+  countLabel(state.emails);
+export const selectInboxCountLabel: DomainSelector<string | null> = (state) =>
+  countLabel(state.inbox);
 
 export const selectEmailById = memoByKey<AdminEmailDTO | null>(
   (id) => (state) => state.emails.byId[id] ?? null

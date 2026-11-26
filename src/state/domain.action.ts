@@ -11,6 +11,7 @@ import type {
   DomainState,
   InboxItemDTO,
   InboxMessageDTO,
+  InboxNotice,
   Toast,
   ToastKind,
 } from './domain.state';
@@ -19,6 +20,7 @@ import type {
   DraftAttachmentInput,
   DraftInput,
   DraftPatch,
+  InboxMessageOptions,
   PreviewInput,
 } from '@/lib/admin/apiClient';
 
@@ -37,7 +39,10 @@ export type DomainAction =
   | { type: 'emails/loaded'; payload: PagePayload<AdminEmailDTO> }
   | { type: 'emails/upserted'; payload: { email: AdminEmailDTO } }
   | { type: 'emails/removed'; payload: { id: string } }
-  | { type: 'inbox/loaded'; payload: PagePayload<InboxItemDTO> }
+  | {
+      type: 'inbox/loaded';
+      payload: PagePayload<InboxItemDTO> & { notice?: InboxNotice | null };
+    }
   | { type: 'inbox/messageLoaded'; payload: { message: InboxMessageDTO } }
   | { type: 'requests/started'; payload: { key: string } }
   | { type: 'requests/succeeded'; payload: { key: string } }
@@ -81,9 +86,10 @@ export function emailRemoved(id: string): DomainAction {
 export function inboxLoaded(
   items: InboxItemDTO[],
   nextCursor: string | null,
-  append = false
+  append = false,
+  notice: InboxNotice | null = null
 ): DomainAction {
-  return { type: 'inbox/loaded', payload: { items, nextCursor, append } };
+  return { type: 'inbox/loaded', payload: { items, nextCursor, append, notice } };
 }
 
 export function inboxMessageLoaded(message: InboxMessageDTO): DomainAction {
@@ -151,6 +157,7 @@ export const requestKeys = {
   emailSend: (id: string) => `emails/send:${id}`,
   emailRefresh: (id: string) => `emails/refresh:${id}`,
   emailPreview: 'emails/preview',
+  emailRender: (id: string) => `emails/render:${id}`,
   attachmentUpload: 'attachments/upload',
   inboxList: 'inbox/list',
   inboxListMore: 'inbox/listMore',
@@ -163,8 +170,9 @@ export const requestKeys = {
 
 /** Short human messages; never raw server text, never secrets. */
 export const asyncActionCopy = {
-  loadEmails: { success: 'Emails loaded.', error: "Couldn't load emails." },
-  loadMoreEmails: { success: 'More emails loaded.', error: "Couldn't load more emails." },
+  // List and message loads succeed silently: the list itself is the feedback.
+  loadEmails: { success: null, error: "Couldn't load emails." },
+  loadMoreEmails: { success: null, error: "Couldn't load more emails." },
   saveDraft: { success: 'Draft saved.', error: "Couldn't save the draft." },
   updateDraft: { success: 'Draft saved.', error: "Couldn't save the draft." },
   deleteDraft: { success: 'Draft deleted.', error: "Couldn't delete the draft." },
@@ -174,10 +182,11 @@ export const asyncActionCopy = {
   },
   refreshEmailStatus: { success: 'Status updated.', error: "Couldn't refresh the status." },
   previewEmail: { success: null, error: "Couldn't build the preview." },
+  renderEmail: { success: null, error: "Couldn't show this email." },
   uploadAttachment: { success: null, error: "Couldn't upload the PDF." },
-  loadInbox: { success: 'Inbox loaded.', error: "Couldn't load the inbox." },
-  loadMoreInbox: { success: 'More messages loaded.', error: "Couldn't load more messages." },
-  loadInboxMessage: { success: 'Message loaded.', error: "Couldn't open the message." },
+  loadInbox: { success: null, error: "Couldn't load the inbox." },
+  loadMoreInbox: { success: null, error: "Couldn't load more messages." },
+  loadInboxMessage: { success: null, error: "Couldn't open the message." },
 } as const;
 
 interface ActionCopy<T> {
@@ -207,17 +216,20 @@ export interface AsyncActions {
     patch: DraftPatch,
     options?: SaveOptions
   ): DomainThunk<Promise<AdminEmailDTO | null>>;
-  deleteDraft(id: string): DomainThunk;
+  /** Resolves to true when the draft was deleted. */
+  deleteDraft(id: string): DomainThunk<Promise<boolean>>;
   sendEmail(id: string): DomainThunk<Promise<AdminEmailDTO | null>>;
-  refreshEmailStatus(id: string): DomainThunk;
+  refreshEmailStatus(id: string): DomainThunk<Promise<AdminEmailDTO | null>>;
   previewEmail(input: PreviewInput): DomainThunk<Promise<string | null>>;
+  /** Renders a stored email (draft or sent) to HTML from its saved fields. */
+  renderEmail(email: AdminEmailDTO): DomainThunk<Promise<string | null>>;
   uploadAttachment(
     file: File,
     options?: UploadAttachmentOptions
   ): DomainThunk<Promise<DraftAttachmentInput | null>>;
   loadInbox(): DomainThunk;
   loadMoreInbox(): DomainThunk;
-  loadInboxMessage(id: string): DomainThunk;
+  loadInboxMessage(id: string, options?: InboxMessageOptions): DomainThunk;
 }
 
 function apiErrorField(error: unknown, field: string): unknown {
@@ -334,7 +346,7 @@ export function createAsyncActions(client: AdminApiClient): AsyncActions {
       ),
 
     deleteDraft: (id) => async (dispatch, getState) => {
-      await runRequest(
+      const done = await runRequest(
         dispatch,
         getState,
         requestKeys.emailDelete(id),
@@ -342,8 +354,10 @@ export function createAsyncActions(client: AdminApiClient): AsyncActions {
         async () => {
           await client.deleteEmail(id);
           dispatch(emailRemoved(id));
+          return true;
         }
       );
+      return done === true;
     },
 
     sendEmail: (id) => (dispatch, getState) =>
@@ -373,17 +387,45 @@ export function createAsyncActions(client: AdminApiClient): AsyncActions {
         }
       ),
 
-    refreshEmailStatus: (id) => async (dispatch, getState) => {
-      await runRequest(
+    refreshEmailStatus: (id) => (dispatch, getState) =>
+      runRequest(
         dispatch,
         getState,
         requestKeys.emailRefresh(id),
         asyncActionCopy.refreshEmailStatus,
         async () => {
-          dispatch(emailUpserted(await client.refreshEmail(id)));
+          const email = await client.refreshEmail(id);
+          dispatch(emailUpserted(email));
+          return email;
         }
-      );
-    },
+      ),
+
+    renderEmail: (email) => (dispatch, getState) =>
+      runRequest(
+        dispatch,
+        getState,
+        requestKeys.emailRender(email.id),
+        asyncActionCopy.renderEmail,
+        async () => {
+          const preview = await client.previewEmail({
+            kind: email.kind,
+            toEmail: email.toEmail,
+            recipientName: email.recipientName,
+            businessName: email.businessName,
+            subject: email.subject,
+            bodyHtml: email.bodyHtml,
+            calendlyUrl: email.calendlyUrl,
+            rows: email.rows,
+            // The saved PDF's name and size (the preview never reads the file).
+            attachment: email.attachment
+              ? { name: email.attachment.name, size: email.attachment.size }
+              : null,
+            inReplyToMessageId: email.inReplyToMessageId,
+            source: email.source,
+          });
+          return preview.html;
+        }
+      ),
 
     previewEmail: (input) => (dispatch, getState) =>
       runRequest(dispatch, getState, requestKeys.emailPreview, asyncActionCopy.previewEmail, async () => {
@@ -415,7 +457,7 @@ export function createAsyncActions(client: AdminApiClient): AsyncActions {
     loadInbox: () => async (dispatch, getState) => {
       await runRequest(dispatch, getState, requestKeys.inboxList, asyncActionCopy.loadInbox, async () => {
         const page = await client.listInbox();
-        dispatch(inboxLoaded(page.items, page.nextCursor, false));
+        dispatch(inboxLoaded(page.items, page.nextCursor, false, page.notice ?? null));
       });
     },
 
@@ -434,14 +476,14 @@ export function createAsyncActions(client: AdminApiClient): AsyncActions {
       );
     },
 
-    loadInboxMessage: (id) => async (dispatch, getState) => {
+    loadInboxMessage: (id, options) => async (dispatch, getState) => {
       await runRequest(
         dispatch,
         getState,
         requestKeys.inboxMessage(id),
         asyncActionCopy.loadInboxMessage,
         async () => {
-          dispatch(inboxMessageLoaded(await client.getInboxMessage(id)));
+          dispatch(inboxMessageLoaded(await client.getInboxMessage(id, options)));
         }
       );
     },

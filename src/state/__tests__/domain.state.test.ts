@@ -12,6 +12,7 @@ import {
   domainReducer,
   initialDomainState,
   selectEmailById,
+  selectEmailCountLabel,
   selectEmailIds,
   selectInboxIds,
   selectInboxItemById,
@@ -105,7 +106,7 @@ describe('initial state and combineSlices', () => {
   test('initial state has every slice', () => {
     assert.deepEqual(initialDomainState, {
       emails: { byId: {}, order: [], nextCursor: null, loaded: false },
-      inbox: { byId: {}, order: [], nextCursor: null, loaded: false, messageById: {} },
+      inbox: { byId: {}, order: [], nextCursor: null, loaded: false, messageById: {}, notice: null },
       requests: {},
       toasts: { items: [] },
     });
@@ -477,7 +478,7 @@ describe('async actions', () => {
   beforeEach(() => mock.timers.enable({ apis: ['setTimeout'] }));
   afterEach(() => mock.timers.reset());
 
-  test('loadEmails: started -> loaded -> succeeded -> success toast', async () => {
+  test('loadEmails: started -> loaded -> succeeded, no success toast', async () => {
     const page: Page<AdminEmailDTO> = { items: [email('a')], nextCursor: 'c1' };
     const actions = createAsyncActions(stubClient({ listEmails: async () => page }));
     const store = createDomainStore();
@@ -493,10 +494,8 @@ describe('async actions', () => {
     assert.deepEqual(statuses, ['pending', 'success']);
     assert.deepEqual(state.emails.order, ['a']);
     assert.equal(state.emails.nextCursor, 'c1');
-    assert.deepEqual(
-      state.toasts.items.map((t) => [t.kind, t.message]),
-      [['success', asyncActionCopy.loadEmails.success]]
-    );
+    // List loads are silent on success (only failures toast).
+    assert.deepEqual(state.toasts.items, []);
   });
 
   test('failure uses the safe API message and never raw error text', async () => {
@@ -734,5 +733,97 @@ describe('composer actions (Stage 5)', () => {
     assert.equal(result, null);
     assert.deepEqual(store.getState().toasts.items, []);
     assert.equal(store.getState().requests[requestKeys.attachmentUpload]?.status, 'success');
+  });
+});
+
+describe('sending and receiving (Stage 6)', () => {
+  beforeEach(() => mock.timers.enable({ apis: ['setTimeout'] }));
+  afterEach(() => mock.timers.reset());
+
+  test('loadInbox stores the receiving notice; load more keeps it; a later page clears it', async () => {
+    let call = 0;
+    const actions = createAsyncActions(
+      stubClient({
+        listInbox: async (options) => {
+          call += 1;
+          if (options?.after) return { items: [], nextCursor: null };
+          return call === 1
+            ? { items: [], nextCursor: 'c1', notice: 'receiving-not-configured' as const }
+            : { items: [inboxItem('1')], nextCursor: null };
+        },
+      })
+    );
+    const store = createDomainStore();
+    await store.dispatch(actions.loadInbox());
+    assert.equal(store.getState().inbox.notice, 'receiving-not-configured');
+    await store.dispatch(actions.loadMoreInbox());
+    assert.equal(store.getState().inbox.notice, 'receiving-not-configured');
+    await store.dispatch(actions.loadInbox());
+    assert.equal(store.getState().inbox.notice, null);
+  });
+
+  test('count labels: null before load, "N+" while more pages exist', async () => {
+    const actions = createAsyncActions(
+      stubClient({ listEmails: async () => ({ items: [email('a'), email('b')], nextCursor: 'c1' }) })
+    );
+    const store = createDomainStore();
+    assert.equal(selectEmailCountLabel(store.getState()), null);
+    await store.dispatch(actions.loadEmails());
+    assert.equal(selectEmailCountLabel(store.getState()), '2+');
+  });
+
+  test('refresh, send and delete update only the affected email (no refetch)', async () => {
+    let listCalls = 0;
+    const actions = createAsyncActions(
+      stubClient({
+        listEmails: async () => {
+          listCalls += 1;
+          return { items: [email('a'), email('b', { status: 'SENT' })], nextCursor: null };
+        },
+        refreshEmail: async () => email('b', { status: 'SENT', lastEvent: 'delivered' }),
+        deleteEmail: async () => undefined,
+      })
+    );
+    const store = createDomainStore();
+    await store.dispatch(actions.loadEmails());
+    const rowA = store.getState().emails.byId.a;
+    const refreshed = await store.dispatch(actions.refreshEmailStatus('b'));
+    assert.equal(refreshed?.lastEvent, 'delivered');
+    assert.equal(store.getState().emails.byId.a, rowA, 'other rows keep their reference');
+    assert.equal(await store.dispatch(actions.deleteDraft('a')), true);
+    assert.deepEqual(store.getState().emails.order, ['b']);
+    assert.equal(listCalls, 1);
+  });
+
+  test('loadInboxMessage passes the images option through', async () => {
+    const seen: (boolean | undefined)[] = [];
+    const actions = createAsyncActions(
+      stubClient({
+        getInboxMessage: async (_id, options) => {
+          seen.push(options?.images);
+          return inboxMessage('1');
+        },
+      })
+    );
+    const store = createDomainStore();
+    await store.dispatch(actions.loadInboxMessage('1'));
+    await store.dispatch(actions.loadInboxMessage('1', { images: true }));
+    assert.deepEqual(seen, [undefined, true]);
+  });
+
+  test('renderEmail sends the stored fields without a storage path', async () => {
+    let body: unknown = null;
+    const actions = createAsyncActions(
+      stubClient({
+        previewEmail: async (input) => {
+          body = input;
+          return { html: '<p>x</p>' };
+        },
+      })
+    );
+    const store = createDomainStore();
+    const stored = email('a', { attachment: { name: 'a.pdf', size: 10 } });
+    assert.equal(await store.dispatch(actions.renderEmail(stored)), '<p>x</p>');
+    assert.deepEqual((body as { attachment: unknown }).attachment, { name: 'a.pdf', size: 10 });
   });
 });

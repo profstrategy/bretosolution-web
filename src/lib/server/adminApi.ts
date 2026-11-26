@@ -30,10 +30,13 @@ export function conflict(message: string): Response {
  * optional provider code: never request data, payloads or secrets.
  */
 export function serverError(label: string, error: unknown, code?: string | number | null): Response {
+  // Prisma error codes ("P1001", "P2024"…) are safe to log and say what failed.
+  const prismaCode = error instanceof Error ? Reflect.get(error, 'code') : undefined;
+  const safeCode = code ?? (typeof prismaCode === 'string' && /^P\d{4}$/.test(prismaCode) ? prismaCode : '');
   console.error(
     `[admin-api] ${label} failed.`,
     error instanceof Error ? error.name : typeof error,
-    code ?? ''
+    safeCode
   );
   return json({ ok: false, message: 'Something went wrong. Please try again.' }, 500);
 }

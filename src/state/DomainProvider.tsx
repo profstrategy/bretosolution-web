@@ -23,7 +23,14 @@ import {
 
 export {
   selectEmailById,
+  selectEmailCountLabel,
   selectEmailIds,
+  selectEmailsLoaded,
+  selectEmailsNextCursor,
+  selectInboxCountLabel,
+  selectInboxLoaded,
+  selectInboxNextCursor,
+  selectInboxNotice,
   selectInboxIds,
   selectInboxItemById,
   selectInboxMessage,
@@ -105,10 +112,11 @@ function bindAsyncActions(dispatch: DomainDispatch): BoundAsyncActions {
     sendEmail: (id) => dispatch(asyncActions.sendEmail(id)),
     refreshEmailStatus: (id) => dispatch(asyncActions.refreshEmailStatus(id)),
     previewEmail: (input) => dispatch(asyncActions.previewEmail(input)),
+    renderEmail: (email) => dispatch(asyncActions.renderEmail(email)),
     uploadAttachment: (file, options) => dispatch(asyncActions.uploadAttachment(file, options)),
     loadInbox: () => dispatch(asyncActions.loadInbox()),
     loadMoreInbox: () => dispatch(asyncActions.loadMoreInbox()),
-    loadInboxMessage: (id) => dispatch(asyncActions.loadInboxMessage(id)),
+    loadInboxMessage: (id, options) => dispatch(asyncActions.loadInboxMessage(id, options)),
   };
 }
 

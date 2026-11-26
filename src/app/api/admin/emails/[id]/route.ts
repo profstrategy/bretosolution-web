@@ -79,12 +79,18 @@ export async function PATCH(request: Request, context: RouteContext): Promise<Re
     const ruleErrors = draftRuleErrors(merged);
     if (Object.keys(ruleErrors).length > 0) return badRequest(ruleErrors);
 
-    // Guarded update: a concurrent send can no longer be edited.
-    const updated = await prisma.adminEmail.updateMany({
-      where: { id, status: { in: [...EDITABLE] } },
-      data: { ...draftToColumns(merged), status: 'DRAFT', error: null },
-    });
-    if (updated.count === 0) return conflict(ALREADY_SENT);
+    // Guarded update that returns the row (one round trip): a concurrent send
+    // can no longer be edited. No match → Prisma P2025 → 409.
+    let record;
+    try {
+      record = await prisma.adminEmail.update({
+        where: { id, status: { in: [...EDITABLE] } },
+        data: { ...draftToColumns(merged), status: 'DRAFT', error: null },
+      });
+    } catch (error) {
+      if (error instanceof Error && Reflect.get(error, 'code') === 'P2025') return conflict(ALREADY_SENT);
+      throw error;
+    }
 
     const oldPath = current.attachment?.storagePath;
     if (oldPath && oldPath !== merged.attachment?.storagePath) {
@@ -93,7 +99,6 @@ export async function PATCH(request: Request, context: RouteContext): Promise<Re
       });
     }
 
-    const record = await prisma.adminEmail.findUniqueOrThrow({ where: { id } });
     return json({ email: toAdminEmailDTO(record) });
   } catch (error) {
     return serverError('emails/update', error);

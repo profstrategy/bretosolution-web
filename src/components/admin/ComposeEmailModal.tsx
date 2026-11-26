@@ -189,7 +189,9 @@ export function ComposeEmailModal({ mode, onClose, fallbackFocus }: ComposeEmail
   }, [fallbackFocus]);
 
   useEffect(() => {
-    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const active = document.activeElement;
+    // <body> is not an opener (e.g. the clicked button was removed): use the fallback.
+    const opener = active instanceof HTMLElement && active !== document.body ? active : null;
     fieldRefs.current.toEmail?.focus();
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';

@@ -1,11 +1,12 @@
 'use client';
 
 import { Fragment } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { AppLink } from '@/components/ui/AppLink';
 import { adminShellCopy } from '@/content/admin';
 import { selectEmailById, selectInboxItemById, useDomainSelector } from '@/state';
 import { cn } from '@/lib/utils';
+import { resolveSubject } from '@/lib/admin/emailFormat';
 import { ADMIN_ROOT_PATH } from '@/components/admin/paths';
 
 interface Crumb {
@@ -21,13 +22,15 @@ function sectionLabel(segment: string): string {
 }
 
 /**
- * "Admin › Emails" and, on a detail route (/admin/emails/<id>),
- * "Admin › Emails › <subject>". The subject comes from the domain store.
+ * "Admin › Emails" and, while a detail panel is open (?open=<id>, or a
+ * /admin/emails/<id> path), "Admin › Emails › <subject>". The subject comes
+ * from the domain store.
  */
 export function AdminBreadcrumb({ className }: { className?: string }) {
   const pathname = usePathname() ?? ADMIN_ROOT_PATH;
+  const searchParams = useSearchParams();
   const [, , section, detailId] = pathname.split('/');
-  const id = detailId ? decodeURIComponent(detailId) : '';
+  const id = detailId ? decodeURIComponent(detailId) : (searchParams.get('open') ?? '');
 
   const email = useDomainSelector(selectEmailById(id));
   const inboxItem = useDomainSelector(selectInboxItemById(id));
@@ -37,8 +40,9 @@ export function AdminBreadcrumb({ className }: { className?: string }) {
     crumbs.push({ label: sectionLabel(section), href: `${ADMIN_ROOT_PATH}/${section}` });
   }
   if (id) {
-    const subject = email?.subject || inboxItem?.subject || adminShellCopy.detailFallback;
-    crumbs.push({ label: subject, href: pathname });
+    const subject = (email ? resolveSubject(email) : '') || inboxItem?.subject || adminShellCopy.detailFallback;
+    const query = searchParams.toString();
+    crumbs.push({ label: subject, href: query ? `${pathname}?${query}` : pathname });
   }
 
   return (
