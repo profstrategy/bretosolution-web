@@ -11,7 +11,7 @@ export const routes = {
   bookCall: '/book-call',
 } as const;
 
-export const calendlyUrl = '[Calendly scheduling link]';
+export const calendlyUrl = 'https://calendly.com/breto';
 
 const contactEmail = 'hello@bretosolution.com';
 const contactPhone = '0916 034 7172';
@@ -51,6 +51,13 @@ export const site = {
     phone: contactPhone,
     whatsapp: contactPhone,
     whatsappUrl,
+  },
+  social: {
+    heading: 'Follow us on social media.',
+    links: [
+      { id: 'instagram', label: 'Instagram', href: 'https://www.instagram.com/bretosolution/' },
+      { id: 'linkedin', label: 'LinkedIn', href: 'https://www.linkedin.com/company/bretosolution/' },
+    ],
   },
   legal: {
     privacy: '[Privacy notice]',

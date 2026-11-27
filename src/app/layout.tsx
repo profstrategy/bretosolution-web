@@ -122,6 +122,7 @@ const siteStructuredData = {
       logo: new URL(seoContent.logoPath, seoContent.siteUrl).toString(),
       description: seoContent.pages.home.description,
       email: 'hello@bretosolution.com',
+      sameAs: site.social.links.map((link) => link.href),
     },
     {
       '@type': 'WebSite',

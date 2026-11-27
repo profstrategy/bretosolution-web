@@ -2,6 +2,7 @@ import { Container } from '@/components/ui/Container';
 import { AppLink } from '@/components/ui/AppLink';
 import { assets } from '@/content/assets';
 import { site } from '@/content/site';
+import { SocialLinks } from '@/components/layout/SocialLinks';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -27,6 +28,7 @@ export function Footer() {
             <p className="mt-4 max-w-[38ch] font-[family-name:var(--font-sans)] text-[14px] leading-relaxed text-[var(--muted)]">
               {site.footer.brandDescription}
             </p>
+            <SocialLinks className="mt-5" />
           </div>
 
           {/* 2. Company */}
