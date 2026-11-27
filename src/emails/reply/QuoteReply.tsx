@@ -47,13 +47,13 @@ export function QuoteReply(p: QuoteReplyProps) {
       {p.rows.length > 0 ? (
         <KeyValueTable title={c.rowsTitle} rows={p.rows} />
       ) : null}
-      {p.attachment ? (
+      {/* {p.attachment ? (
         <Callout
           title={c.attachmentTitle}
           detail={`${p.attachment.name} (${p.attachment.sizeLabel})`}
           note={c.attachmentNote}
         />
-      ) : null}
+      ) : null} */}
       {p.calendlyUrl ? (
         <CtaButton lead={c.ctaLead} label={c.ctaLabel} href={p.calendlyUrl} />
       ) : null}

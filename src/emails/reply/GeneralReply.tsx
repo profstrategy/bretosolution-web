@@ -34,13 +34,13 @@ export function GeneralReply(p: GeneralReplyProps) {
     >
       <Para text={p.greeting} />
       <BodyHtml html={p.bodyHtml} />
-      {p.attachment ? (
+      {/* {p.attachment ? (
         <Callout
           title={c.attachmentTitle}
           detail={`${p.attachment.name} (${p.attachment.sizeLabel})`}
           note={c.attachmentNote}
         />
-      ) : null}
+      ) : null} */}
       {p.calendlyUrl ? (
         <CtaButton lead={c.ctaLead} label={c.ctaLabel} href={p.calendlyUrl} />
       ) : null}

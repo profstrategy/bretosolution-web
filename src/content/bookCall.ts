@@ -24,7 +24,7 @@ export const bookCallContent = {
     brandName: 'Bretosolution',
     placeholderMessage:
       'Your booking calendar will appear here once Calendly is connected.',
-    eventRowLabel: 'Audit call · [duration]',
+    eventRowLabel: 'Audit call · 30 minutes',
     previewPillLabel: 'Preview placeholder',
     slowLoadMessage: 'The calendar is taking a while to load.',
     openNewTabButtonLabel: 'Open Calendly in a new tab',

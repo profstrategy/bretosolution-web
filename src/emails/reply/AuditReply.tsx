@@ -45,11 +45,11 @@ export function AuditReply(p: AuditReplyProps) {
       {p.business ? <Subheading>Prepared for {p.business}</Subheading> : null}
       <Para text={p.greeting} />
       <BodyHtml html={p.bodyHtml} />
-      <Callout
+      {/* <Callout
         title={c.attachmentTitle}
         detail={`${p.attachment.name} (${p.attachment.sizeLabel})`}
         note={c.attachmentNote}
-      />
+      /> */}
       {p.calendlyUrl ? (
         <CtaButton lead={c.ctaLead} label={c.ctaLabel} href={p.calendlyUrl} />
       ) : null}
