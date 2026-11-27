@@ -59,6 +59,7 @@ export async function POST(request: Request): Promise<Response> {
     businessName: parsed.data.businessName,
     websiteOrInstagram: parsed.data.websiteOrInstagram,
     city: parsed.data.city,
+    fullAddress: parsed.data.fullAddress,
     businessType: parsed.data.businessType,
     email: parsed.data.email,
   };

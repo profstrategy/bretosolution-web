@@ -61,6 +61,7 @@ export function QuoteRequestForm() {
       phoneOrWhatsapp: '',
       websiteOrInstagram: '',
       countryRegion: '',
+      fullAddress: '',
       consent: false,
       [HONEYPOT_FIELD]: '',
     },
@@ -414,6 +415,28 @@ export function QuoteRequestForm() {
               </option>
             ))}
           </select>
+        </FormField>
+
+        <FormField
+          id="quote-full-address"
+          label={copy.fullAddressLabel}
+          error={errors.fullAddress?.message}
+        >
+          <textarea
+            id="quote-full-address"
+            rows={2}
+            autoComplete="street-address"
+            placeholder={copy.fullAddressPlaceholder}
+            aria-invalid={Boolean(errors.fullAddress)}
+            aria-describedby={
+              errors.fullAddress ? 'quote-full-address-error' : undefined
+            }
+            className={cn(
+              formTextareaBaseClass,
+              errors.fullAddress && 'border-[var(--accent)]'
+            )}
+            {...register('fullAddress')}
+          />
         </FormField>
 
         <ConsentCheckbox

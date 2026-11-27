@@ -33,6 +33,7 @@ export const defaultProps: AuditRequestNotificationProps = {
     businessName: 'Sample Kitchen',
     websiteOrInstagram: 'https://sample-kitchen.example',
     city: 'Lagos',
+    fullAddress: '12 Admiralty Way, Lekki Phase 1, Lagos',
     businessType: 'Restaurant',
     email: 'owner@example.com',
   },
@@ -57,6 +58,7 @@ export function AuditRequestNotification({
     [copy.labels.businessName, displayValue(values.businessName)],
     [copy.labels.websiteOrInstagram, displayValue(values.websiteOrInstagram)],
     [copy.labels.city, displayValue(values.city)],
+    [copy.labels.fullAddress, displayValue(values.fullAddress)],
     [copy.labels.businessType, displayValue(values.businessType)],
     [
       copy.labels.email,

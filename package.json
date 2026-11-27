@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint --config node_modules/eslint-config-next/dist/core-web-vitals.js --rule \"react-hooks/set-state-in-effect: off\" src",
-    "test": "node --test \"src/state/__tests__/*.test.ts\" \"src/lib/server/__tests__/*.test.ts\" && node scripts/check-admin-guards.ts",
+    "test": "node --test \"src/state/__tests__/*.test.ts\" \"src/lib/server/__tests__/*.test.ts\" \"src/schemas/__tests__/*.test.ts\" && node scripts/check-admin-guards.ts",
     "admin:check-guards": "node scripts/check-admin-guards.ts",
     "admin:hash": "tsx scripts/hash-admin-password.ts",
     "postinstall": "prisma generate"

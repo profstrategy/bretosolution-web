@@ -105,6 +105,8 @@ export const pricingContent = {
     countryRegionLabel: 'Where is your business based? *',
     countryRegionPlaceholder: 'Select location',
     countryRegionOptions: QUOTE_LOCATION_OPTIONS,
+    fullAddressLabel: 'Full business address *',
+    fullAddressPlaceholder: '[Street or landmark, area, city, state]',
     backButtonLabel: 'Back',
     submitIdleLabel: 'Request a quote',
     submitSendingLabel: 'Sending your request…',

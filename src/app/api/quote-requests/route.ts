@@ -65,6 +65,7 @@ export async function POST(request: Request): Promise<Response> {
     phoneOrWhatsapp: parsed.data.phoneOrWhatsapp,
     websiteOrInstagram: parsed.data.websiteOrInstagram,
     countryRegion: parsed.data.countryRegion,
+    fullAddress: parsed.data.fullAddress,
   };
   const consentAcceptedAt = new Date();
   const userAgent = request.headers.get('user-agent')?.slice(0, 200) ?? null;

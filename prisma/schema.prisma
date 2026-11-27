@@ -24,6 +24,8 @@ model AuditRequest {
   businessName       String
   websiteOrInstagram String
   city               String
+  /// Null for requests made before the field existed (2026-11-27).
+  fullAddress        String?
   businessType       String
   email              String
   status             RequestStatus @default(NEW)
@@ -46,6 +48,8 @@ model QuoteRequest {
   phoneOrWhatsapp    String?
   websiteOrInstagram String?
   countryRegion      String
+  /// Null for requests made before the field existed (2026-11-27).
+  fullAddress        String?
   status             RequestStatus @default(NEW)
   createdAt          DateTime      @default(now())
   ipHash             String

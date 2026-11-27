@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { BUSINESS_TYPES } from '@/schemas/audit';
 import { HONEYPOT_FIELD } from '@/schemas/honeypot';
+import { fullAddressSchema } from '@/schemas/address';
 import { CONSENT_ERROR_MESSAGE } from '@/content/legal';
 
 export const QUOTE_BUSINESS_TYPES = BUSINESS_TYPES;
@@ -70,6 +71,7 @@ export const quoteRequestSchema = z.object({
       (val) => (QUOTE_LOCATION_OPTIONS as readonly string[]).includes(val),
       { message: 'Please select where your business is based.' }
     ),
+  fullAddress: fullAddressSchema,
   consent: z
     .boolean({ error: CONSENT_ERROR_MESSAGE })
     .refine((value) => value === true, {

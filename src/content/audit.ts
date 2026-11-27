@@ -23,6 +23,8 @@ export const auditFormContent = {
   websitePlaceholder: '[Link, or “none yet”]',
   cityLabel: 'City',
   cityPlaceholder: '[City]',
+  fullAddressLabel: 'Full business address',
+  fullAddressPlaceholder: '[Street or landmark, area, city, state]',
   businessTypeLabel: 'Business type',
   businessTypes: BUSINESS_TYPES satisfies readonly BusinessType[],
   emailLabel: 'Business email',

@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   FormField,
   formControlBaseClass,
+  formTextareaBaseClass,
 } from '@/components/forms/FormField';
 import { Button } from '@/components/ui/Button';
 import { AppLink } from '@/components/ui/AppLink';
@@ -45,6 +46,7 @@ export function AuditRequestForm() {
       businessName: '',
       websiteOrInstagram: '',
       city: '',
+      fullAddress: '',
       businessType: 'Restaurant',
       email: '',
       consent: false,
@@ -235,7 +237,30 @@ export function AuditRequestForm() {
         </FormField>
       </div>
 
-      {/* 5. Business email */}
+      {/* 5. Full business address */}
+      <FormField
+        id="audit-full-address"
+        label={copy.fullAddressLabel}
+        error={errors.fullAddress?.message}
+      >
+        <textarea
+          id="audit-full-address"
+          rows={2}
+          autoComplete="street-address"
+          placeholder={copy.fullAddressPlaceholder}
+          aria-invalid={Boolean(errors.fullAddress)}
+          aria-describedby={
+            errors.fullAddress ? 'audit-full-address-error' : undefined
+          }
+          className={cn(
+            formTextareaBaseClass,
+            errors.fullAddress && 'border-[var(--accent)]'
+          )}
+          {...register('fullAddress')}
+        />
+      </FormField>
+
+      {/* 6. Business email */}
       <FormField
         id="audit-email"
         label={copy.emailLabel}
