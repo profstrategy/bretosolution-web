@@ -40,7 +40,10 @@ export async function GET(request: Request): Promise<Response> {
 
     const inbox = getAdminInboxAddress();
     const items: InboxItemDTO[] = data.data
-      .filter((email) => addressedTo([...email.to, ...email.received_for], inbox))
+      // The SDK types say `received_for` is always an array, but the list
+      // response leaves it out, so spreading it unguarded throws (HTTP 500).
+      .filter((email) =>
+        addressedTo([...email.to, ...(Array.isArray(email.received_for) ? email.received_for : [])], inbox))
       .map((email) => ({
         id: email.id,
         from: email.from,
