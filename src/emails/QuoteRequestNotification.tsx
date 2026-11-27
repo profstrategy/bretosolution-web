@@ -39,6 +39,7 @@ export const defaultProps: QuoteRequestNotificationProps = {
     phoneOrWhatsapp: undefined,
     websiteOrInstagram: undefined,
     countryRegion: 'Nigeria',
+    fullAddress: '12 Admiralty Way, Lekki Phase 1, Lagos',
   },
   consent: {
     acceptedAt: new Date('2000-01-01T00:00:00.000Z'),
@@ -76,6 +77,7 @@ export function QuoteRequestNotification({
     [copy.labels.phoneOrWhatsapp, displayValue(values.phoneOrWhatsapp)],
     [copy.labels.websiteOrInstagram, displayValue(values.websiteOrInstagram)],
     [copy.labels.countryRegion, displayValue(values.countryRegion)],
+    [copy.labels.fullAddress, displayValue(values.fullAddress)],
     [
       copy.labels.consent,
       `Accepted ${consent.acceptedAt.toISOString()} (policy version ${consent.version})`,

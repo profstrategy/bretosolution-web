@@ -53,6 +53,31 @@ export function EmailFooter() {
           lineHeight: '1.5',
         }}
       >
+        {emailFooterCopy.websiteLabel}:{' '}
+        <Link
+          href={seoContent.siteUrl}
+          style={{ color: emailColors.accent, textDecoration: 'underline' }}
+        >
+          {emailFooterCopy.websiteText}
+        </Link>
+        {' · '}
+        {emailFooterCopy.whatsappLabel}:{' '}
+        <Link
+          href={emailFooterCopy.whatsappUrl}
+          style={{ color: emailColors.accent, textDecoration: 'underline' }}
+        >
+          {emailFooterCopy.whatsapp}
+        </Link>
+      </Text>
+      <Text
+        style={{
+          margin: '0 0 8px',
+          color: emailColors.text,
+          fontFamily: 'Arial, Helvetica, sans-serif',
+          fontSize: '12px',
+          lineHeight: '1.5',
+        }}
+      >
         <Link
           href={getUnsubscribeUrl()}
           style={{ color: emailColors.accent, textDecoration: 'underline' }}

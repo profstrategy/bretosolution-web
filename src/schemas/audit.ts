@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { HONEYPOT_FIELD } from '@/schemas/honeypot';
+import { fullAddressSchema } from '@/schemas/address';
 import { CONSENT_ERROR_MESSAGE } from '@/content/legal';
 
 export const BUSINESS_TYPES = [
@@ -33,6 +34,7 @@ export const auditRequestSchema = z.object({
       message: 'Enter a website URL, an @handle, or the words "none yet".',
     }),
   city: z.string().trim().min(1, 'Please enter your city.'),
+  fullAddress: fullAddressSchema,
   businessType: z.enum(BUSINESS_TYPES, {
     message: 'Please select a business type.',
   }),

@@ -1,3 +1,4 @@
+import 'server-only';
 import { canSendConfirmation } from '@/lib/server/confirmationLimit';
 import type { NotificationResult } from '@/lib/server/notify';
 

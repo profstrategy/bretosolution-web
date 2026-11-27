@@ -24,6 +24,8 @@ model AuditRequest {
   businessName       String
   websiteOrInstagram String
   city               String
+  /// Null for requests made before the field existed (2026-11-27).
+  fullAddress        String?
   businessType       String
   email              String
   status             RequestStatus @default(NEW)
@@ -46,6 +48,8 @@ model QuoteRequest {
   phoneOrWhatsapp    String?
   websiteOrInstagram String?
   countryRegion      String
+  /// Null for requests made before the field existed (2026-11-27).
+  fullAddress        String?
   status             RequestStatus @default(NEW)
   createdAt          DateTime      @default(now())
   ipHash             String
@@ -63,4 +67,51 @@ model RateLimitHit {
 
   @@index([bucket, ipHash, createdAt])
   @@index([createdAt])
+}
+
+enum AdminEmailKind {
+  AUDIT
+  QUOTE
+  GENERAL
+}
+
+enum AdminEmailStatus {
+  DRAFT
+  SENDING
+  SENT
+  FAILED
+}
+
+/// Which website submission an admin email answers (AuditRequest or QuoteRequest).
+enum AdminEmailSourceType {
+  AUDIT
+  QUOTE
+}
+
+model AdminEmail {
+  id                 String                @id @default(cuid())
+  kind               AdminEmailKind
+  status             AdminEmailStatus      @default(DRAFT)
+  toEmail            String
+  recipientName      String?
+  businessName       String?
+  subject            String
+  bodyHtml           String
+  calendlyUrl        String?
+  rows               Json?
+  attachmentPath     String?
+  attachmentName     String?
+  attachmentSize     Int?
+  inReplyToMessageId String?
+  /// Set only when the email answers a website request; verified at render time.
+  sourceRequestType  AdminEmailSourceType?
+  sourceRequestId    String?
+  resendId           String?               @unique
+  lastEvent          String?
+  error              String?
+  sentAt             DateTime?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+
+  @@index([status, createdAt])
 }

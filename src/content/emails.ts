@@ -33,6 +33,11 @@ export const emailFooterCopy = {
   unsubscribeSubject: 'Unsubscribe',
   unsubscribeBody: 'Please stop emailing me.',
   postalAddress: site.postalAddress,
+  websiteLabel: 'Website',
+  websiteText: site.domain,
+  whatsappLabel: 'WhatsApp',
+  whatsapp: site.contact.whatsapp,
+  whatsappUrl: site.contact.whatsappUrl,
 } as const;
 
 export function getUnsubscribeUrl(): string {
@@ -49,6 +54,7 @@ export const ownerNotificationCopy = {
       businessName: 'Business name',
       websiteOrInstagram: 'Website or Instagram',
       city: 'City',
+      fullAddress: 'Full address',
       businessType: 'Business type',
       email: 'Email',
       consent: 'Consent',
@@ -67,6 +73,7 @@ export const ownerNotificationCopy = {
       phoneOrWhatsapp: 'Phone or WhatsApp',
       websiteOrInstagram: 'Website or Instagram',
       countryRegion: 'Country or region',
+      fullAddress: 'Full address',
       consent: 'Consent',
       received: 'Received',
     },

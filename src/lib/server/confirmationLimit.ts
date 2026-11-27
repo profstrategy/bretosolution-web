@@ -1,3 +1,4 @@
+import 'server-only';
 import { getPrismaClient } from '@/lib/db';
 
 const confirmationWindowMs = 24 * 60 * 60 * 1000;

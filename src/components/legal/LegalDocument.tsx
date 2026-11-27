@@ -1,6 +1,7 @@
 import { Container } from '@/components/ui/Container';
 import { Eyebrow } from '@/components/ui/Eyebrow';
 import { Section } from '@/components/ui/Section';
+import { SocialLinks } from '@/components/layout/SocialLinks';
 import type { LegalSection } from '@/content/legal';
 
 export interface LegalDocumentProps {
@@ -108,6 +109,11 @@ export function LegalDocument({
                 ) : null}
               </section>
             ))}
+
+            <SocialLinks
+              className="border-t border-[var(--line)] pt-[32px]"
+              headingClassName="text-[16px] leading-[1.7]"
+            />
           </article>
         </div>
       </Container>

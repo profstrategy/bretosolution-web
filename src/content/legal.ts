@@ -1,5 +1,5 @@
-export const LEGAL_VERSION = '2026-11-21';
-export const LEGAL_LAST_UPDATED = '2026-11-21';
+export const LEGAL_VERSION = '2026-11-27';
+export const LEGAL_LAST_UPDATED = '2026-11-27';
 export const CONSENT_ERROR_MESSAGE =
   'Please accept the Terms of Service and Privacy Policy to continue.';
 
@@ -27,11 +27,11 @@ export const privacyPolicy: LegalSection[] = [
       'We collect only the information shown below when you use the relevant feature.',
     ],
     list: [
-      'Audit request: business name, website or Instagram address or handle, city, business type, and business email.',
-      'Quote request: business type, the service you need, an optional main-challenge description, contact name, business name, email, an optional phone or WhatsApp number, an optional website or Instagram address or handle, and whether the business is based in Nigeria or another country.',
+      'Audit request: business name, website or Instagram address or handle, city, full business address, business type, and business email.',
+      'Quote request: business type, the service you need, an optional main-challenge description, contact name, business name, email, an optional phone or WhatsApp number, an optional website or Instagram address or handle, whether the business is based in Nigeria or another country, and the full business address.',
       'Booking via Calendly: the booking fields and other information you enter in Calendly. The site currently uses a Calendly scheduling link placeholder, so no live booking page or Calendly booking data is active in the code today.',
       'Technical data: when you submit a form, the server records a salted SHA-256 hash of the IP address, a user-agent string limited to 200 characters, the submission time, notification status, and rate-limit bucket records with the time of each hit. Raw IP addresses are not stored. The hidden honeypot fields are checked to reduce automated submissions; a value in a honeypot is not saved.',
-      'Browser storage: we store the selected theme, either light or dark, in localStorage under the key breto-theme. We do not use cookies or other localStorage, sessionStorage, or IndexedDB values in the application code.',
+      'Browser storage: we store the selected theme, either light or dark, in localStorage under the key breto-theme.',
     ],
   },
   {
@@ -50,7 +50,7 @@ export const privacyPolicy: LegalSection[] = [
     heading: 'Who receives it',
     paragraphs: [
       'Audit and quote information is stored in our PostgreSQL database and may be sent to our nominated email recipient through Resend for lead notification.',
-      'The database hosting provider is SUPABASE. The website hosting provider is godaddy. The Resend account region or processing location is US Region.',
+      'The database hosting provider is SUPABASE. The website hosting provider is hostinger deployed on vercel. The Resend account region or processing location is US Region.',
       'Calendly may receive the information you enter if you use a live Calendly scheduling page. Its use is not active today because the scheduling link remains a placeholder.',
       'Next font generation is configured for Inter, Playfair Display, JetBrains Mono, and Satisfy; the code does not identify a separate browser-side font service or script provider.',
     ],

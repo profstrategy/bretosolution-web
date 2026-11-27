@@ -11,9 +11,12 @@ export const routes = {
   bookCall: '/book-call',
 } as const;
 
-export const calendlyUrl = '[Calendly scheduling link]';
+export const calendlyUrl = 'https://calendly.com/breto';
 
 const contactEmail = 'hello@bretosolution.com';
+const contactPhone = '0916 034 7172';
+/** WhatsApp chat link: wa.me needs the international form (Nigeria, +234, no leading 0). */
+const whatsappUrl = `https://wa.me/234${contactPhone.replace(/\D/g, '').replace(/^0/, '')}`;
 const postalAddress = [
   '35, Jakana Plaza',
   'Lagos Street',
@@ -39,13 +42,22 @@ export const site = {
   longCtaLabel: 'Request a Free AI Visibility Audit',
   contactEmail,
   postalAddress,
-  contactPhone: '0916 034 7172',
+  contactPhone,
   domain: 'bretosolution.com',
   legalPrivacy: '[Privacy notice]',
   legalTerms: '[Terms of service]',
   contact: {
     email: contactEmail,
-    phone: '0916 034 7172',
+    phone: contactPhone,
+    whatsapp: contactPhone,
+    whatsappUrl,
+  },
+  social: {
+    heading: 'Follow us on social media.',
+    links: [
+      { id: 'instagram', label: 'Instagram', href: 'https://www.instagram.com/bretosolution/' },
+      { id: 'linkedin', label: 'LinkedIn', href: 'https://www.linkedin.com/company/bretosolution/' },
+    ],
   },
   legal: {
     privacy: '[Privacy notice]',
